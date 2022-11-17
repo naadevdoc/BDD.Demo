@@ -25,6 +25,7 @@ namespace ShoppingCart.Services
         public override void Load()
         {
             Bind<ISampleService>().To<SampleService>();
+            Bind<ICatalogueServices>().To<CatalogueServices>();
         }
     }
 
