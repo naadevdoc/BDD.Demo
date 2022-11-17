@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ShoppingCart.Services.Model.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,6 @@ namespace ShoppingCart.Services.Model.CatalogueService
 {
     public class AddExchangeRateRequest : EntityRequest
     {
+        public ExchangeRate ExchangeRate { get; set; } = new ExchangeRate();
     }
 }

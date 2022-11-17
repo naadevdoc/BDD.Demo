@@ -4,6 +4,7 @@ using ShoppingCart.Services.Model.CatalogueService;
 using ShoppingCart.Services.Model.SampleService;
 using ShoppingCart.Services.Services;
 using System;
+using System.ComponentModel.DataAnnotations;
 using TechTalk.SpecFlow;
 
 namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
@@ -98,67 +99,28 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
         }
 
 
-        [Then(@"AddProduct operation will have a parameter AddProductRequest inherating EntityRequest")]
-        public void ThenAddProductOperationWillHaveAParameterAddProductRequestInheratingEntityRequest()
+        [Then(@"(.*) operation will have a parameter (.*) inherating EntityRequest")]
+        public void ThenAddProductOperationWillHaveAParameterAddProductRequestInheratingEntityRequest(string operation, string parameter)
         {
             var catalogueServices = _scenarioContext.Get<ICatalogueServices>(ServiceContextKey);
-            var request = new AddProductRequest();
-            var requestType = request.GetType();
-            Assert.True(requestType.Name == "AddProductRequest");
-            Assert.True(requestType.IsSubclassOf(typeof(EntityRequest)));
-            var response = catalogueServices.AddProduct(request);
-            _scenarioContext.Add(ResponseContextKey, response);
+            var targetOperation = catalogueServices.GetType().Methods().Where(x => x.Name == operation).ToList().FirstOrDefault();
+            Assert.True(targetOperation != null, $"Operation {operation} is not available yet");
+            var requestType = targetOperation.GetParameters().FirstOrDefault(x => x.ParameterType.Name == parameter)?.ParameterType;
+            Assert.True(requestType != null, $"Parameter {parameter} is not detected as part of the service");
+            var requestInstance = Activator.CreateInstance( requestType ) as EntityRequest;
+            Assert.True(requestInstance != null, $"Request type should be an EntityRequest entity");
         }
 
-        [Then(@"AddProduct operation will have an output AddProductResponse inherating EntityResponse")]
-        public void ThenAddProductOperationWillHaveAnOutputAddProductResponseInheratingEntityResponse()
-        {
-            var response = _scenarioContext.Get<AddProductResponse>(ResponseContextKey);
-            var responseType = response.GetType();
-            Assert.True(responseType.Name == "AddProductResponse");
-            Assert.True(responseType.IsSubclassOf(typeof(EntityResponse)));
-
-        }
-        [Then(@"AddPersona operation will have a parameter AddPersonaRequest inherating EntityRequest")]
-        public void ThenAddPersonaOperationWillHaveAParameterAddPersonaRequestInheratingEntityRequest()
+        [Then(@"(.*) operation will have an output (.*) inherating EntityResponse")]
+        public void ThenAddProductOperationWillHaveAnOutputAddProductResponseInheratingEntityResponse(string operation, string returnedParameter)
         {
             var catalogueServices = _scenarioContext.Get<ICatalogueServices>(ServiceContextKey);
-            var request = new AddPersonaRequest();
-            var requestType = request.GetType();
-            Assert.True(requestType.Name == "AddPersonaRequest");
-            Assert.True(requestType.IsSubclassOf(typeof(EntityRequest)));
-            var response = catalogueServices.AddPersona(request);
-            _scenarioContext.Add(ResponseContextKey, response);
-        }
-
-        [Then(@"AddPersona operation will have an output AddPersonaResponse inherating EntityResponse")]
-        public void ThenAddPersonaOperationWillHaveAnOutputAddPersonaResponseInheratingEntityResponse()
-        {
-            var response = _scenarioContext.Get<AddPersonaResponse>(ResponseContextKey);
-            var responseType = response.GetType();
-            Assert.True(responseType.Name == "AddPersonaResponse");
-            Assert.True(responseType.IsSubclassOf(typeof(EntityResponse)));
-        }
-
-        [Then(@"AddExchangeRate operation will have a parameter AddExchangeRateRequest inherating EntityRequest")]
-        public void ThenAddExchangeRateOperationWillHaveAParameterAddExchangeRateRequestInheratingEntityRequest()
-        {
-            var catalogueServices = _scenarioContext.Get<ICatalogueServices>(ServiceContextKey);
-            var request = new AddExchangeRateRequest();
-            var requestType = request.GetType();
-            Assert.True(requestType.Name == "AddExchangeRateRequest");
-            Assert.True(requestType.IsSubclassOf(typeof(EntityRequest)));
-            var response = catalogueServices.AddExchangeRate(request);
-            _scenarioContext.Add(ResponseContextKey, response);
-        }
-
-        [Then(@"AddExchangeRate operation will have an output AddExchangeRateResponse inherating EntityResponse")]
-        public void ThenAddExchangeRateOperationWillHaveAnOutputAddExchangeRateResponseInheratingEntityResponse()
-        {
-            var response = _scenarioContext.Get<AddExchangeRateResponse>(ResponseContextKey);
-            var responseType = response.GetType();
-            Assert.True(responseType.Name == "AddExchangeRateResponse");
-            Assert.True(responseType.IsSubclassOf(typeof(EntityResponse)));
+            var targetOperation = catalogueServices.GetType().Methods().Where(x => x.Name == operation).ToList().FirstOrDefault();
+            Assert.True(targetOperation != null, $"Operation {operation} is not available yet");
+            var responseType = targetOperation.ReturnType;
+            Assert.True(responseType.Name == returnedParameter, $"Returned parameter should {returnedParameter} and it is {responseType.Name}");
+            var requestInstance = Activator.CreateInstance(responseType) as EntityResponse;
+            Assert.True(requestInstance != null, $"Request type should be an EntityResponse entity");
         }
 
     }

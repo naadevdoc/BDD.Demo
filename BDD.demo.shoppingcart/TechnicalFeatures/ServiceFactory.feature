@@ -16,6 +16,7 @@ Scenario: Services will be granted through Inversion of Control
 	Then the response will be of type SampleResponse which inherates EntityResponse
 	And SampleResponse will have a property Result with value 'True'
 
+
 Rule: Catalogue Services to enable populating and reading data for the tests
 Scenario: Catalogue Services AddProduct
 	Given an interface ICatalogueServices

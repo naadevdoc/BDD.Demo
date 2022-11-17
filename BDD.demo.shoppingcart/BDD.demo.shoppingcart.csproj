@@ -19,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="BusinessFeatures\StepDefinitions\" />
     <Folder Include="Drivers\" />
     <Folder Include="Support\" />
     <Folder Include="TechnicalFeatures\StepDefinitions\" />

@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ShoppingCart.Services.Model.CatalogueService
+namespace ShoppingCart.Services.Model.Entities
 {
-    public class AddProductResponse : EntityResponse
+    public enum CurrencyType
     {
+        EUR,
+        USD,
+        JPY
     }
 }

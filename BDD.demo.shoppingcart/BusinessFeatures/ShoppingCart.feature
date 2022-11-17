@@ -25,7 +25,7 @@ Background:
 	  | JPY           | EUR         | 0.008   |
 	  | EUR           | JPY         | 129.737 |
 
-
+	  
 Rule: Persona can check in products without purchasing
 
 
