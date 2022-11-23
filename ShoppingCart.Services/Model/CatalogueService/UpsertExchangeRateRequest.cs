@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ShoppingCart.Services.Model.CatalogueService
 {
-    public class AddExchangeRateRequest : EntityRequest
+    public class UpsertExchangeRateRequest : EntityRequest
     {
         public ExchangeRate ExchangeRate { get; set; } = new ExchangeRate();
     }

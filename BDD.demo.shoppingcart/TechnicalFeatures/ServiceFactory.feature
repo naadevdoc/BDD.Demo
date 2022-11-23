@@ -18,21 +18,51 @@ Scenario: Services will be granted through Inversion of Control
 
 
 Rule: Catalogue Services to enable populating and reading data for the tests
-Scenario: Catalogue Services AddProduct
-	Given an interface ICatalogueServices
-	Then this interface ICatalogueServices contains an operation AddProduct
-	And AddProduct operation will have a parameter AddProductRequest inherating EntityRequest
-	And AddProduct operation will have an output AddProductResponse inherating EntityResponse
 
-Scenario: Catalogue Services AddPersona
+@CatalogueServices
+Scenario Outline: Catalogue Services
 	Given an interface ICatalogueServices
-	Then this interface ICatalogueServices contains an operation AddPersona
-	And AddPersona operation will have a parameter AddPersonaRequest inherating EntityRequest
-	And AddPersona operation will have an output AddPersonaResponse inherating EntityResponse
-	
-Scenario: Catalogue Services AddExchangeRate
-	Given an interface ICatalogueServices
-	Then this interface ICatalogueServices contains an operation AddExchangeRate
-	And AddExchangeRate operation will have a parameter AddExchangeRateRequest inherating EntityRequest
-	And AddExchangeRate operation will have an output AddExchangeRateResponse inherating EntityResponse
-	
+	Then this interface ICatalogueServices contains an operation <Operation>
+	And <Operation> operation will have a parameter <RequestName> inherating EntityRequest
+	And <Operation> operation will have an output <ResponseName> inherating EntityResponse
+Examples: 
+	| Operation          | RequestName               | ResponseName               |
+	| UpsertProduct      | UpsertProductRequest      | UpsertProductResponse      |
+	| UpsertPersona      | UpsertPersonaRequest      | UpsertPersonaResponse      |
+	| GetPersonaByName   | GetPersonaRequest         | GetPersonaResponse         |
+	| UpsertExchangeRate | UpsertExchangeRateRequest | UpsertExchangeRateResponse |
+
+@CatalogueServices
+@UpsertPersona
+Scenario: Persona default values
+	Given an unitialized Persona
+	Then Persona preffered currency will be EUR
+	And fidelity discount will be 0.0
+
+Scenario: UpsertPersona returns error when Name of Persona is not defined in UpsertPersonaRequest
+	Given a Persona
+	When operation UpsertPersona is invoked in ICatalogueServices
+	Then the response HttpCode will be BadRequest 
+	And response Error message will be 'Persona Name must be filled'
+
+Scenario: UpsertPersona returns error when UpsertPersonaRequest exists but Persona is null
+	Given a Persona which has been assigned to null
+	When operation UpsertPersona is invoked in ICatalogueServices
+	Then the response HttpCode will be BadRequest 
+	And response Error message will be 'Persona must be different than null in request'
+
+Scenario: UpsertPersonaRequest is null returns an error message
+	Given an interface ICatalogueService
+	When an operation UpsertPersona is invoked with a null request
+	Then the response HttpCode will be BadRequest
+	And response Error message will be 'Request must be initialized'
+
+
+@CatalogueServices
+@UpsertPersona
+Scenario: GetPersona returns error when not found in catalogue
+	Given a persona called 'Bob'
+	When operation GetPersona is invoked in ICatalogueServices
+	Then the response HttpCode will be NotFound
+	And response Error message will be 'Persona with name Bob is not found'
+

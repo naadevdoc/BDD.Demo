@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ShoppingCart.Services.Model.Entities;
 
 namespace ShoppingCart.Services.Model.CatalogueService
 {
-    public class AddProductRequest : EntityRequest
+    public abstract class PersonaResponse : EntityResponse
     {
-        public Product Product { get; set; } = new Product();
     }
 }

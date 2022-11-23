@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ShoppingCart.Services.Model.CatalogueService
 {
-    public class AddPersonaRequest : EntityRequest
+    public abstract class PersonaRequest : EntityRequest
     {
         public Persona Persona { get; set; } = new Persona();
     }

@@ -9,8 +9,9 @@ namespace ShoppingCart.Services.Services
 {
     public interface ICatalogueServices
     {
-        AddPersonaResponse AddPersona(AddPersonaRequest request);
-        AddProductResponse AddProduct(AddProductRequest request);
-        AddExchangeRateResponse AddExchangeRate(AddExchangeRateRequest request);
+        UpsertPersonaResponse UpsertPersona(UpsertPersonaRequest request);
+        UpsertProductResponse UpsertProduct(UpsertProductRequest request);
+        UpsertExchangeRateResponse UpsertExchangeRate(UpsertExchangeRateRequest request);
+        GetPersonaResponse GetPersonaByName(GetPersonaRequest request);
     }
 }

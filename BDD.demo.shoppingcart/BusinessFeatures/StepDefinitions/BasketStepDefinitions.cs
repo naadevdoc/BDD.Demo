@@ -21,7 +21,7 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
         public void GivenTheCatalogueHasFollowingProducts(Table table)
         {
             //  | name | price | currency | discount |
-            var listOfRequests = table.Rows.Select(row => new AddProductRequest
+            var listOfRequests = table.Rows.Select(row => new UpsertProductRequest
             {
                 Product = new Product
                 {
@@ -32,15 +32,15 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
                 }
             });
             var service = ServiceFactory.GetA<ICatalogueServices>();
-            var listOfResponses = listOfRequests.Select(productRequest => service.AddProduct(productRequest));
-            listOfResponses.ToList().ForEach(response => Assert.True(response.HttpCode >= HttpStatusCode.OK, response.ErrorCode));
+            var listOfResponses = listOfRequests.Select(productRequest => service.UpsertProduct(productRequest));
+            listOfResponses.ToList().ForEach(response => Assert.True(response.HttpCode >= HttpStatusCode.OK, response.ErrorMessage));
         }
 
         [Given(@"these personas are registered")]
         public void GivenThesePersonasAreRegistered(Table table)
         {
             //| Name        | Fidelity discount | Preferred currency |
-            var listOfRequests = table.Rows.Select(row => new AddPersonaRequest
+            var listOfRequests = table.Rows.Select(row => new UpsertPersonaRequest
             {
                 Persona = new Persona
                 {
@@ -50,15 +50,15 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
                 }
             });
             var service = ServiceFactory.GetA<ICatalogueServices>();
-            var listOfResponses = listOfRequests.Select(personaRequest => service.AddPersona(personaRequest));
-            listOfResponses.ToList().ForEach(response => Assert.True(response.HttpCode >= HttpStatusCode.OK, response.ErrorCode));
+            var listOfResponses = listOfRequests.Select(personaRequest => service.UpsertPersona(personaRequest));
+            listOfResponses.ToList().ForEach(response => Assert.True(response.HttpCode >= HttpStatusCode.OK, response.ErrorMessage));
         }
 
         [Given(@"the exchange rate at the time of operation is as follows")]
         public void GivenTheExchangeRateAtTheTimeOfOperationIsAsFollows(Table table)
         {
             //| From Currency | To Currency | Rate    |
-            var listOfRequests = table.Rows.Select(row => new AddExchangeRateRequest
+            var listOfRequests = table.Rows.Select(row => new UpsertExchangeRateRequest
             {
                 ExchangeRate = new ExchangeRate
                 {
@@ -68,8 +68,41 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
                 }
             });
             var service = ServiceFactory.GetA<ICatalogueServices>();
-            var listOfResponses = listOfRequests.Select(request => service.AddExchangeRate(request));
-            listOfResponses.ToList().ForEach(response => Assert.True(response.HttpCode >= HttpStatusCode.OK, response.ErrorCode));
+            var listOfResponses = listOfRequests.Select(request => service.UpsertExchangeRate(request));
+            listOfResponses.ToList().ForEach(response => Assert.True(response.HttpCode >= HttpStatusCode.OK, response.ErrorMessage));
         }
+        [Given(@"I am David")]
+        public void IamDavid()
+        {
+            DefineUser("David");
+        }
+        private void DefineUser(string name)
+        {
+            var personaResponse = ServiceFactory.GetA<ICatalogueServices>().GetPersonaByName(new GetPersonaRequest { Persona = new Persona { Name = name } });
+            Assert.True(personaResponse.HttpCode >= HttpStatusCode.OK && personaResponse.HttpCode <= HttpStatusCode.OK, personaResponse.ErrorMessage);
+            Assert.True(personaResponse.Persona != null, $"Persona with name {name} has not been found in catalogue");
+            Assert.True(personaResponse.Persona.Name == name);
+            _scenarioContext.Add(ConstantsStepDefinitions.GetPersonaResponseKey, personaResponse);
+        }
+
+
+        private Persona? GetPersonaFromGetPersonaResponse()
+        {
+            var personaResponse = _scenarioContext.Get<GetPersonaResponse>(ConstantsStepDefinitions.GetPersonaResponseKey);
+            Assert.True(personaResponse != null, $"{typeof(GetPersonaResponse).Name} is not filled yet.");
+            Assert.True(!string.IsNullOrEmpty(personaResponse?.Persona?.Name), "Something went wrong obtaining persona");
+            return personaResponse?.Persona;
+        } 
+        [Given(@"I am having an empty cart")]
+        public void GivenIAmHavingAnEmptyCart()
+        {
+            var persona = GetPersonaFromGetPersonaResponse();
+            var checkedOutProducts = persona?.CheckedOutProducts != null ? persona.CheckedOutProducts : throw new InvalidOperationException("CheckedOutProducts not initialized");
+            checkedOutProducts.Clear();
+            var request = new UpsertPersonaRequest { Persona = persona };
+            var response = ServiceFactory.GetA<ICatalogueServices>().UpsertPersona(request);
+            Assert.True(response.HttpCode >= HttpStatusCode.OK && response.HttpCode <= HttpStatusCode.Accepted, response.ErrorMessage);
+        }
+
     }
 }

@@ -9,7 +9,8 @@ namespace ShoppingCart.Services.Model.Entities
     public class Persona
     {
         public string Name { get; set; } = string.Empty;
-        public CurrencyType PreferredCurrency { get; set; }
-        public double FidelityDiscount { get; set; }
+        public CurrencyType PreferredCurrency { get; set; } = CurrencyType.EUR;
+        public double FidelityDiscount { get; set; } = 0.0;
+        public List<Product> CheckedOutProducts { get; set; } = new List<Product>();
     }
 }
