@@ -104,5 +104,10 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             Assert.True(response.HttpCode >= HttpStatusCode.OK && response.HttpCode <= HttpStatusCode.Accepted, response.ErrorMessage);
         }
 
+        [Given(@"I check in a product '([^']*)'")]
+        public void GivenICheckInAProduct(string productName)
+        {
+        }
+
     }
 }

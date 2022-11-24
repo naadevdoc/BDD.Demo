@@ -14,7 +14,20 @@ namespace ShoppingCart.Services.Services.Implementation
     internal class CatalogueServices : ICatalogueServices
     {
         static IList<Persona> Personas = new List<Persona>();
-        public UpsertProductResponse UpsertProduct(UpsertProductRequest request) => new UpsertProductResponse();
+        static IList<Product> Products = new List<Product>();
+        public UpsertProductResponse UpsertProduct(UpsertProductRequest request)
+        {
+            var response = request.ValidateRequest(new UpsertProductResponse());
+            if (response.HttpCode == HttpStatusCode.OK) 
+            {
+                if (Products.Any(x => x.Name == request?.Product?.Name))
+                {
+                    Products.Remove(Products.Single(x => x.Name == request?.Product?.Name));
+                }
+                Products.Add(request.Product.Clone());
+            }
+            return response;
+        }
         public UpsertPersonaResponse UpsertPersona(UpsertPersonaRequest request)
         {
             var response = request.ValidateRequest(new UpsertPersonaResponse());
@@ -48,6 +61,28 @@ namespace ShoppingCart.Services.Services.Implementation
                     {
                         response.HttpCode = HttpStatusCode.NotFound;
                         response.ErrorMessage = $"Persona with name {request?.Persona?.Name} is not found";
+                    }
+                }
+            }
+            return response;
+        }
+
+        public GetProductResponse GetProductByName(GetProductRequest request)
+        {
+            var response = request.ValidateRequest(new GetProductResponse());
+            if (response.HttpCode == HttpStatusCode.OK)
+            {
+                var product = Products.FirstOrDefault(x => x.Name.Equals(request?.Product?.Name));
+                if (response.HttpCode == HttpStatusCode.OK)
+                {
+                    if (product != null)
+                    {
+                        response.Product = product.Clone();
+                    }
+                    else
+                    {
+                        response.HttpCode = HttpStatusCode.NotFound;
+                        response.ErrorMessage = $"Product {request?.Product?.Name} is no longer in catalogue";
                     }
                 }
             }

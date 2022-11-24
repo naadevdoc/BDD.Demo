@@ -9,8 +9,8 @@ namespace ShoppingCart.Services.Model.Entities
     public class Product
     {
         public string Name { get; set; } = string.Empty;
-        public double Price { get; set; }
-        public CurrencyType Currency { get; set; }
-        public double Discount { get; set; }
+        public double Price { get; set; } = 0.0;
+        public CurrencyType Currency { get; set; } = CurrencyType.EUR;
+        public double Discount { get; set; } = 0.0;
     }
 }

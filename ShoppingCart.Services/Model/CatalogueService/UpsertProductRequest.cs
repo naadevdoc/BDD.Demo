@@ -7,8 +7,7 @@ using ShoppingCart.Services.Model.Entities;
 
 namespace ShoppingCart.Services.Model.CatalogueService
 {
-    public class UpsertProductRequest : EntityRequest
+    public class UpsertProductRequest : ProductRequest
     {
-        public Product Product { get; set; } = new Product();
     }
 }

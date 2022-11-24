@@ -13,5 +13,6 @@ namespace ShoppingCart.Services.Services
         UpsertProductResponse UpsertProduct(UpsertProductRequest request);
         UpsertExchangeRateResponse UpsertExchangeRate(UpsertExchangeRateRequest request);
         GetPersonaResponse GetPersonaByName(GetPersonaRequest request);
+        GetProductResponse GetProductByName(GetProductRequest request);
     }
 }
