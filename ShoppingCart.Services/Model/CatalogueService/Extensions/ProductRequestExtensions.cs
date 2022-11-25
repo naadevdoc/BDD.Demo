@@ -1,4 +1,5 @@
 ﻿using ShoppingCart.Services.Model.Entities;
+using ShoppingCart.Services.Model.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,8 +17,7 @@ namespace ShoppingCart.Services.Model.CatalogueService.Extensions
                                     request?.Product == null ? "Product must be different than null in request" :
                                     string.IsNullOrEmpty(request?.Product?.Name) ? "Product name must be filled" :
                                     string.Empty;
-            defaultResponse.HttpCode = string.IsNullOrEmpty(defaultResponse.ErrorMessage) ? HttpStatusCode.OK : HttpStatusCode.BadRequest;
-            return defaultResponse;
+            return defaultResponse.SetHttpCode();
         }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ShoppingCart.Services.Model.CatalogueService
 {
-    public class ProductResponse : EntityResponse
+    public class ProductResponse : NamedResponse
     {
     }
 }

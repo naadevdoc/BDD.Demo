@@ -25,7 +25,7 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             {
                 Product = new Product
                 {
-                    Name = row["product"],
+                    Name = row["productResponse"],
                     Price = double.Parse(row["price"]),
                     Currency = Enum.Parse<CurrencyType>(row["currency"]),
                     Discount = double.Parse(row["discount"].Replace("%", "")) / 100
@@ -71,12 +71,8 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             var listOfResponses = listOfRequests.Select(request => service.UpsertExchangeRate(request));
             listOfResponses.ToList().ForEach(response => Assert.True(response.HttpCode >= HttpStatusCode.OK, response.ErrorMessage));
         }
-        [Given(@"I am David")]
-        public void IamDavid()
-        {
-            DefineUser("David");
-        }
-        private void DefineUser(string name)
+        [Given(@"I have signed in as (.*)")]
+        public void GivenIHaveSignedInAsDavid(string name)
         {
             var personaResponse = ServiceFactory.GetA<ICatalogueServices>().GetPersonaByName(new GetPersonaRequest { Persona = new Persona { Name = name } });
             Assert.True(personaResponse.HttpCode >= HttpStatusCode.OK && personaResponse.HttpCode <= HttpStatusCode.OK, personaResponse.ErrorMessage);
@@ -90,9 +86,10 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
         {
             var personaResponse = _scenarioContext.Get<GetPersonaResponse>(ConstantsStepDefinitions.GetPersonaResponseKey);
             Assert.True(personaResponse != null, $"{typeof(GetPersonaResponse).Name} is not filled yet.");
-            Assert.True(!string.IsNullOrEmpty(personaResponse?.Persona?.Name), "Something went wrong obtaining persona");
+            Assert.True(!string.IsNullOrEmpty(personaResponse?.Persona?.Name), "Something went wrong obtaining personaResponse");
             return personaResponse?.Persona;
-        } 
+        }
+
         [Given(@"I am having an empty cart")]
         public void GivenIAmHavingAnEmptyCart()
         {
@@ -104,10 +101,6 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             Assert.True(response.HttpCode >= HttpStatusCode.OK && response.HttpCode <= HttpStatusCode.Accepted, response.ErrorMessage);
         }
 
-        [Given(@"I check in a product '([^']*)'")]
-        public void GivenICheckInAProduct(string productName)
-        {
-        }
 
     }
 }

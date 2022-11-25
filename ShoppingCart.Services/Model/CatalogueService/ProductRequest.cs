@@ -7,8 +7,10 @@ using ShoppingCart.Services.Model.Entities;
 
 namespace ShoppingCart.Services.Model.CatalogueService
 {
-    public class ProductRequest : EntityRequest
+    public class ProductRequest : NamedRequest
     {
         public Product Product { get; set; } = new Product();
+
+        public override string GetNameFromNamedEntity() => Product.Name;
     }
 }

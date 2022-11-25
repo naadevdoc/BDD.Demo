@@ -1,4 +1,5 @@
 ﻿using ShoppingCart.Services.Model.Entities;
+using ShoppingCart.Services.Model.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,8 @@ namespace ShoppingCart.Services.Model.CatalogueService.Extensions
             defaultResponse.ErrorMessage = request == null ? "Request must be initialized" :
                                     request?.Persona == null ? "Persona must be different than null in request" :
                                     string.IsNullOrEmpty(request?.Persona?.Name) ? "Persona Name must be filled" :
-                                    string.Empty;
-            defaultResponse.HttpCode = string.IsNullOrEmpty(defaultResponse.ErrorMessage) ? HttpStatusCode.OK : HttpStatusCode.BadRequest;
-            return defaultResponse;
+                                    string.Empty;            
+            return defaultResponse.SetHttpCode();
         }
     }
 }

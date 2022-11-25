@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace ShoppingCart.Services.Model.CatalogueService
 {
-    public abstract class PersonaResponse : NamedResponse
+    public abstract class NamedRequest : EntityRequest
     {
+        public abstract string GetNameFromNamedEntity();
     }
 }

@@ -30,7 +30,7 @@ Rule: Persona can check in products without purchasing
 
 
 Scenario: Delta01->A persona can check in a single product
-	Given I am David
+	Given I have signed in as David
 	And I am having an empty cart
 	And I check in a product 'motion-cam-hero-10-2021'
 	When I list checked in products
@@ -38,7 +38,7 @@ Scenario: Delta01->A persona can check in a single product
 	And cart total will be 10 EUR
 
 Scenario: Delta02->A persona can check in same product several times
-	Given I am David
+	Given I have signed in as David
 	And I am having an empty cart
 	And I add following products to my cart 2 times
 	 | product                 |
@@ -51,7 +51,7 @@ Scenario: Delta02->A persona can check in same product several times
 	And total cost will be 20 EUR
 
 Scenario: Delta03->A persona can also check in several products
-	Given I am David
+	Given I have signed in as David
 	And I am having an empty cart
 	And I add following products to my cart
 	 | product                 |
@@ -65,7 +65,7 @@ Scenario: Delta03->A persona can also check in several products
 	And cart total will be 1352 EUR
 
 Scenario: Delta04->A persona can check in a product and pay in a different currency than preferred one
-	Given I am Paul
+	Given I have signed in as Paul
 	And I am having an empty cart
 	And I check in a product 'motion-cam-hero-10-2021'
 	When I list checked in products
@@ -75,14 +75,14 @@ Scenario: Delta04->A persona can check in a product and pay in a different curre
 Rule: A persona can purchase a previously checked in product
 
 Scenario: Delta05->A persona purchases a checked in product
-	Given I am Paul
+	Given I have signed in as Paul
 	And I check in a product 'motion-cam-hero-10-2021'
 	When I purchase my product
 	Then I will receive a message 'Thank you for your purchase'
 	
 
 Scenario: Delta06->A persona cannot purchase when cart is empty
-	Given I am Paul
+	Given I have signed in as Paul
 	And I am having an empty cart
 	When I purchase my product
 	Then I will receive a message 'There are no items to purchase'
@@ -91,7 +91,7 @@ Rule: Some products have a discount
 
 
 Scenario: Delta07->A persona who checks in a discounted product will get a discount
-	Given I am David
+	Given I have signed in as David
 	And I am having an empty cart
 	And I add following products to my cart
 	 | product                 |
@@ -108,7 +108,7 @@ Rule: Personas have a fidelity discount and this fidelity discount is different 
 
 
 Scenario: Delta08->A persona with fidelity discount will get a discount on final price
-	Given I am Maria
+	Given I have signed in as Maria
 	And I am having an empty cart
 	And I check in a product 'motion-cam-hero-10-2021'
 	When I list checked in products
@@ -118,7 +118,7 @@ Scenario: Delta08->A persona with fidelity discount will get a discount on final
 
 
 Scenario: Delta09->Product discount does not apply for personas with fidelity discount
-	Given I am Maria
+	Given I have signed in as Maria
 	And I am having an empty cart
 	And I add following products to my cart
 	 | product                 |
@@ -134,7 +134,7 @@ Scenario: Delta09->Product discount does not apply for personas with fidelity di
 
 
 Scenario: Delta10->Product discount does not apply on a different currency than local one
-	Given I am Paul
+	Given I have signed in as Paul
 	And I am having an empty cart
 	And I check in a product 'motion-cam-hero-09-2019'
 	When I list checked in products
@@ -143,7 +143,7 @@ Scenario: Delta10->Product discount does not apply on a different currency than 
 
 
 Scenario: Delta11->Fidelity discount applies on a different currency than local one
-	Given I am Jules
+	Given I have signed in as Jules
 	And I am having an empty cart
 	And I check in a product 'motion-cam-hero-09-2019'
 	When I list checked in products
@@ -151,21 +151,21 @@ Scenario: Delta11->Fidelity discount applies on a different currency than local 
 	And cart total will be 10.77 USD
 
 
-Scenario: Delta12->Fidelity discount is assigned to currency
-	Given I am Jules
+Scenario: Delta12->Fidelity discount is asigned to currency
+	Given I have signed in as Jules
 	When I switch my preferred currency from USD to EUR
 	Then my fidelity discount will be 0%
 
 
 Scenario: Delta13->Fidelity discount is persisted when the persona switches back to previous currency
-	Given I am Jules
+	Given I have signed in as Jules
 	And I switched my preferred currency from USD to EUR
 	When I siwtch my preferred currency from EUR to USD
 	Then my fidelity discount will be 5%
 
 
 Scenario: Delta14->A persona who buys more than 2000 EUR in a single buy upgrades fidelity discount by 1%
-	Given I am Paul
+	Given I have signed in as Paul
 	And I add following products to my cart
 	 | product            |
 	 | phone-hero-13-2022 |
@@ -178,7 +178,7 @@ Scenario: Delta14->A persona who buys more than 2000 EUR in a single buy upgrade
 
 
 Scenario: Delta15->Maximum fidelity discount for a persona is 20%
-	Given I am Maria
+	Given I have signed in as Maria
 	And I add following products to my cart
 	 | product            |
 	 | phone-hero-13-2022 |

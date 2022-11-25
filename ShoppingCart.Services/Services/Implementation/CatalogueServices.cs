@@ -1,7 +1,10 @@
-﻿using ShoppingCart.Services.Model.CatalogueService;
+﻿using Ninject.Activation;
+using ShoppingCart.Services.Model;
+using ShoppingCart.Services.Model.CatalogueService;
 using ShoppingCart.Services.Model.CatalogueService.Extensions;
 using ShoppingCart.Services.Model.Entities;
 using ShoppingCart.Services.Model.Entities.Extensions;
+using ShoppingCart.Services.Model.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,80 +16,80 @@ namespace ShoppingCart.Services.Services.Implementation
 {
     internal class CatalogueServices : ICatalogueServices
     {
-        static IList<Persona> Personas = new List<Persona>();
-        static IList<Product> Products = new List<Product>();
-        public UpsertProductResponse UpsertProduct(UpsertProductRequest request)
-        {
-            var response = request.ValidateRequest(new UpsertProductResponse());
-            if (response.HttpCode == HttpStatusCode.OK) 
-            {
-                if (Products.Any(x => x.Name == request?.Product?.Name))
-                {
-                    Products.Remove(Products.Single(x => x.Name == request?.Product?.Name));
-                }
-                Products.Add(request.Product.Clone());
-            }
-            return response;
-        }
-        public UpsertPersonaResponse UpsertPersona(UpsertPersonaRequest request)
-        {
-            var response = request.ValidateRequest(new UpsertPersonaResponse());
-            if (response.HttpCode == HttpStatusCode.OK)
-            {
-#pragma warning disable CS8604 //request.ValidateRequest() takes care of ensuring request?.Persona is not null.
-                if (Personas.Any(x => x.Name == request?.Persona?.Name))
-                {
-                    Personas.Remove(Personas.Single(x => x.Name == request?.Persona?.Name));
-                }
-                Personas.Add(request.Persona.Clone());
-#pragma warning restore CS8604
-            }
-            return response;
-        }
+        /// <summary>
+        /// Personas is the dataset storing Personas
+        /// </summary>
+        static IList<NamedEntity> Personas = new List<NamedEntity>();
+        /// <summary>
+        /// Products is the dataset storing Products
+        /// </summary>
+        static IList<NamedEntity> Products = new List<NamedEntity>();
+        /// <summary>
+        /// UpsertProduct will execute following operations
+        /// 1) Validates if the request is correct
+        /// 2) Once data is validated, upserts data in the dataset
+        /// </summary>
+        /// <param name="request">UpsertProductRequest with an entity Product to be upserted</param>
+        /// <returns>UpsertProductResponse with HttpCode.Ok if succeeded, HttpCode.NotFound if not in catalogue and HttpCode.BadRequest if request has not properly created</returns>
+        public UpsertProductResponse UpsertProduct(UpsertProductRequest request) => request.ValidateRequest(new UpsertProductResponse())
+                                                                                           .ContinueWhenOk((response) => request.Product.UpsertIntoRepository(Products, response));
+        /// <summary>
+        /// UpsertPersona will execute following operations
+        /// 1) Validates if the request is correct
+        /// 2) Once data is validated, upserts data in the dataset
+        /// </summary>
+        /// <param name="request">UpsertPersonaRequest with an entity Persona to be upserted</param>
+        /// <returns>UpsertPersonaResponse with HttpCode.Ok if succeeded and HttpCode.BadRequest if request has not properly created</returns>
+        public UpsertPersonaResponse UpsertPersona(UpsertPersonaRequest request) => request.ValidateRequest(new UpsertPersonaResponse())
+                                                                                           .ContinueWhenOk((response)=> request.Persona.UpsertIntoRepository(Personas, response));
         public UpsertExchangeRateResponse UpsertExchangeRate(UpsertExchangeRateRequest request) => new UpsertExchangeRateResponse();
-
-        public GetPersonaResponse GetPersonaByName(GetPersonaRequest request)
+        /// <summary>
+        /// Finds a persona if exists by name
+        /// </summary>
+        /// <param name="request">GetPersonaRequest with a Persona. Only Name is needed. All other properties are ignored</param>
+        /// <returns>GetPersonaResponse with stored persona and HttpCode.Ok if found and HttpCode.BadRequest if there is any error in request</returns>
+        public GetPersonaResponse GetPersonaByName(GetPersonaRequest request) => request.ValidateRequest(new GetPersonaResponse())
+                                                                                        .ContinueWhenOk((response) => SetResponse(response, request));
+        /// <summary>
+        /// Finds a product if exists from product catalog by name
+        /// </summary>
+        /// <param name="request">GetPersonaRequest with a Persona. Only Name is needed. All other properties are ignored</param>
+        /// <returns>GetProductResponse with product in catalog and Http.Ok if found, HttpCode.NotFound if not in catalogue and HttpCode.BadRequest if there is any error in request</returns>
+        public GetProductResponse GetProductByName(GetProductRequest request) => request.ValidateRequest(new GetProductResponse())
+                                                                                        .ContinueWhenOk((response) => SetResponse(response, request));
+        /// <summary>
+        /// Actions driven to fill GetPersonaResponse. It will include Persona when found or NotFound and an custom error message when not found
+        /// </summary>
+        /// <param name="response">The response to be filled</param>
+        /// <param name="request">A valid request</param>
+        /// <returns>Filled response</returns>
+        private GetPersonaResponse SetResponse(GetPersonaResponse response, GetPersonaRequest request)
         {
-            var response = request.ValidateRequest(new GetPersonaResponse());
-            if (response.HttpCode == HttpStatusCode.OK)
-            {
-                var persona = Personas.FirstOrDefault(x => x.Name.Equals(request?.Persona?.Name));
-                if (response.HttpCode == HttpStatusCode.OK)
-                {
-                    if (persona != null)
-                    {
-                        response.Persona = persona.Clone();
-                    }
-                    else
-                    {
-                        response.HttpCode = HttpStatusCode.NotFound;
-                        response.ErrorMessage = $"Persona with name {request?.Persona?.Name} is not found";
-                    }
-                }
-            }
-            return response;
+            response.Persona = SearchByName<Persona>(Personas, request.GetNameFromNamedEntity());
+            return response.Persona == null ? response.SetHttpCodeWithError(HttpStatusCode.NotFound, $"Persona with name {request.GetNameFromNamedEntity()} is not found") : response;
         }
-
-        public GetProductResponse GetProductByName(GetProductRequest request)
+        /// <summary>
+        /// Actions driven to fill GetProductResponse. It will include Persona when found or NotFound and an custom error message when not found
+        /// </summary>
+        /// <param name="response">The response to be filled</param>
+        /// <param name="request">A valid request</param>
+        /// <returns>Filled response</returns>
+        private GetProductResponse SetResponse(GetProductResponse response,GetProductRequest request)
         {
-            var response = request.ValidateRequest(new GetProductResponse());
-            if (response.HttpCode == HttpStatusCode.OK)
-            {
-                var product = Products.FirstOrDefault(x => x.Name.Equals(request?.Product?.Name));
-                if (response.HttpCode == HttpStatusCode.OK)
-                {
-                    if (product != null)
-                    {
-                        response.Product = product.Clone();
-                    }
-                    else
-                    {
-                        response.HttpCode = HttpStatusCode.NotFound;
-                        response.ErrorMessage = $"Product {request?.Product?.Name} is no longer in catalogue";
-                    }
-                }
-            }
-            return response;
+            response.Product = SearchByName<Product>(Products, request.GetNameFromNamedEntity());
+            return response.Product == null ? response.SetHttpCodeWithError(HttpStatusCode.NotFound, $"Product {request.GetNameFromNamedEntity()} is no longer in catalogue") : response;
+        }
+        /// <summary>
+        /// Obtains a copy of the element of a dataset when found by name
+        /// </summary>
+        /// <typeparam name="Y">NamedEntity. That is an entity which can be idenfied by Name</typeparam>
+        /// <param name="namedEntities">DataSet of named entities</param>
+        /// <param name="name">The name to search</param>
+        /// <returns>A copy of the entity or null when not found</returns>
+        private Y? SearchByName<Y>(IList<NamedEntity> namedEntities, string? name)
+            where Y : NamedEntity
+        {
+            return (Y?)(namedEntities.FirstOrDefault(x => x.Name.Equals(name, StringComparison.Ordinal))?.Clone());
         }
     }
 }
