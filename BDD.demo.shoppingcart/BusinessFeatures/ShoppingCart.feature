@@ -45,7 +45,7 @@ Scenario: Delta02->A persona can check in same product several times
 	 | motion-cam-hero-10-2021 |	 
 	When I list checked in products
 	Then following products will be found
-	 | product                 | prize |
+	 | product                 | price |
 	 | motion-cam-hero-10-2021 | 10    |
 	 | motion-cam-hero-10-2021 | 10    |
 	And total cost will be 20 EUR
@@ -59,7 +59,7 @@ Scenario: Delta03->A persona can also check in several products
 	 | phone-hero-13-2022      |
 	When I list checked in products
 	Then following products will be found
-	 | product                 | prize |
+	 | product                 | price |
 	 | motion-cam-hero-10-2021 | 10    |
 	 | phone-hero-13-2022      | 1342  |
 	And cart total will be 1352 EUR
@@ -99,7 +99,7 @@ Scenario: Delta07->A persona who checks in a discounted product will get a disco
 	 | motion-cam-hero-09-2019 |
 	When I list checked in products
 	Then following products will be found
-	 | product                 | prize |
+	 | product                 | price |
 	 | motion-cam-hero-10-2021 | 10    |
 	 | motion-cam-hero-09-2019 | 9     |
 	And cart total will be 19 EUR
@@ -126,7 +126,7 @@ Scenario: Delta09->Product discount does not apply for personas with fidelity di
 	 | motion-cam-hero-9-2019  |
 	When I list checked in products
 	Then following products will be found
-	 | product                | prize |
+	 | product                | price |
 	 | motion-cam-hero-9-2019 | 10    |
 	 | motion-cam-hero-9-2019 | 10    |
 	And cart total will be 16 EUR

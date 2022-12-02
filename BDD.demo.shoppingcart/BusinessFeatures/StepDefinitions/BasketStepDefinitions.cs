@@ -112,6 +112,29 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             personaResponse.Persona.CheckedOutProducts.Add(productResponse.Product);
             ServiceFactory.GetA<ICatalogueServices>().UpsertPersona(new UpsertPersonaRequest { Persona = personaResponse.Persona });
         }
+        [Given(@"I add following products to my cart (.*) times")]
+        public void GivenIAddFollowingProductsToMyCartTimes(int timesToAdd, Table table)
+        {
+            var personaResponse = ExtractGetPersonaResponseFromContext();
+            var productNames = table.Rows.Select(x => x["product"]).ToList();
+            var service = ServiceFactory.GetA<ICatalogueServices>();
+            var products = new List<Product>();
+            var persona = personaResponse.Persona;
+            Assert.NotNull(persona);
+            foreach (var product in productNames)
+            {
+                var getProductRequest = new GetProductRequest { Product = new Product { Name = product } };
+                var getProductResponse = service.GetProductByName(getProductRequest);
+                Assert.True(getProductResponse.HttpCode == HttpStatusCode.OK, getProductResponse.ErrorMessage);
+                Assert.NotNull(getProductResponse?.Product);
+                for (int i = 0; i < timesToAdd; i++)
+                {
+                    personaResponse?.Persona?.CheckedOutProducts.Add(getProductResponse.Product);
+                }
+            }
+            service.UpsertPersona(new UpsertPersonaRequest { Persona = persona });
+        }
+
         [When(@"I list checked in products")]
         public void WhenIListCheckedInProducts()
         {
@@ -144,6 +167,7 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
         }
 
         [Then(@"cart total will be (.*) (.*)")]
+        [Then(@"total cost will be (.*) (.*)")]
         public void ThenCartTotalWillBe(double total, CurrencyType currency)
         {
             var personaResponse = ExtractGetPersonaResponseFromContext();
@@ -151,6 +175,17 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             Assert.True(gettotal != null, "Persona Total is null (which is bad)");
             var asExpected = gettotal.Total == total && gettotal.Currency == currency;
             Assert.True(asExpected, $"{total} {currency} was expected as total instead {gettotal.Total} {gettotal.Currency}");
+        }
+        [Then(@"following products will be found")]
+        public void ThenFollowingProductsWillBeFound(Table table)
+        {
+            var personaResponse = ExtractGetPersonaResponseFromContext();
+            foreach (var row in table.Rows)
+            {
+                var product = row["product"];
+                var price = double.Parse(row["price"]);
+                Assert.True(personaResponse?.Persona?.CheckedOutProducts.FirstOrDefault(x => x.Name == product && x.Price == price) != null, $"{product} with price {price} not found");
+            }
         }
 
     }
