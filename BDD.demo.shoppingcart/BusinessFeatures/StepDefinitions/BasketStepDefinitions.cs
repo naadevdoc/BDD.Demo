@@ -128,15 +128,21 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             _scenarioContext.Remove(ConstantsStepDefinitions.GetPersonaResponseKey);
             _scenarioContext.Add(ConstantsStepDefinitions.GetPersonaResponseKey, personaResponse);
         }
+        private GetPersonaResponse ExtractGetPersonaResponseFromContext()
+        {
+            var personaResponse = _scenarioContext.Get<GetPersonaResponse>(ConstantsStepDefinitions.GetPersonaResponseKey);
+            Assert.True(personaResponse != null, "GetPersonaResponse is not in context. Have you invoked GetPersona service?");
+            Assert.True(personaResponse?.Persona != null, $"GetPersona has not Persona attached. Info:{personaResponse.HttpCode}, {personaResponse.ErrorMessage}");
+            return personaResponse;
+        }
         [Then(@"there will be a single product with code '([^']*)'")]
         public void ThenThereWillBeASingleProductWithCode(string productName)
         {
-            var personaResponse = _scenarioContext.Get<GetPersonaResponse>(ConstantsStepDefinitions.GetPersonaResponseKey);
-            Assert.True(personaResponse != null,"GetPersonaResponse is not in context. Have you invoked GetPersona service?");
-            Assert.True(personaResponse?.Persona != null, $"GetPersona has not Persona attached. Info:{personaResponse.HttpCode}, {personaResponse.ErrorMessage}");
+            var personaResponse = ExtractGetPersonaResponseFromContext();
             var product = personaResponse?.Persona?.CheckedOutProducts.FirstOrDefault(x => x.Name== productName);
             Assert.True(product != null, $"{productName} has not been found in checked products");
         }
+
 
     }
 }

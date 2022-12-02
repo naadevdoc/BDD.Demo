@@ -15,7 +15,10 @@ namespace ShoppingCart.Services.Model.Entities.Extensions
         {
             lock(repository)
             {
-                repository.ToList().RemoveAll(x => x.Name == namedEntity.Name); 
+                var indexes = repository.Where(x => x.Name == namedEntity.Name)
+                                        .Select(x => new KeyValuePair<int,NamedEntity> (repository.IndexOf(x),x))
+                                        .ToList();
+                indexes.ForEach(x => repository.RemoveAt(x.Key));
                 repository.Add((Y)namedEntity.Clone());
                 return response;
             }
