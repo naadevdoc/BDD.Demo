@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ShoppingCart.Services.Model.Entities.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,10 @@ namespace ShoppingCart.Services.Model.Entities
         public CurrencyType PreferredCurrency { get; set; } = CurrencyType.EUR;
         public double FidelityDiscount { get; set; } = 0.0;
         public List<Product> CheckedOutProducts { get; set; } = new List<Product>();
+        public TotalAggregation TotalAggregation 
+        { 
+            get { return this.GetTotal(); }
+        }
 
         public override object Clone()
         {

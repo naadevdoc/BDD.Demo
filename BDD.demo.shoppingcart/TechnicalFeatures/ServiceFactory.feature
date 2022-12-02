@@ -116,3 +116,4 @@ Scenario: GetPersonaByName returns error when not found in catalogue
 	Then the response HttpCode will be NotFound
 	And response Error message will be 'Persona with name Bob is not found'
 
+

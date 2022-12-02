@@ -143,6 +143,15 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             Assert.True(product != null, $"{productName} has not been found in checked products");
         }
 
+        [Then(@"cart total will be (.*) (.*)")]
+        public void ThenCartTotalWillBe(double total, CurrencyType currency)
+        {
+            var personaResponse = ExtractGetPersonaResponseFromContext();
+            var gettotal = personaResponse.Persona?.TotalAggregation;
+            Assert.True(gettotal != null, "Persona Total is null (which is bad)");
+            var asExpected = gettotal.Total == total && gettotal.Currency == currency;
+            Assert.True(asExpected, $"{total} {currency} was expected as total instead {gettotal.Total} {gettotal.Currency}");
+        }
 
     }
 }
