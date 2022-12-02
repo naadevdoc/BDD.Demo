@@ -26,6 +26,7 @@ namespace ShoppingCart.Services
         {
             Bind<ISampleService>().To<SampleService>();
             Bind<ICatalogueServices>().To<CatalogueServices>();
+            Bind<ICartOperationsServices>().To<CartOperationsServices>();
         }
     }
 

@@ -9,6 +9,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Mail;
+using System.Reflection;
 using System.Xml.Linq;
 using TechTalk.SpecFlow;
 
@@ -48,10 +49,16 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
         {
             switch (interfaceName)
             {
+                case "ICartOperationsServices":
+                    _scenarioContext.Add(ConstantsStepDefinitions.InterfaceTypeKey, "ICartOperationsServices");
+                    _scenarioContext.Add(ConstantsStepDefinitions.ServiceContextKey, ServiceFactory.GetA<ICartOperationsServices>());
+                    break;
                 case "ICatalogueServices":
+                    _scenarioContext.Add(ConstantsStepDefinitions.InterfaceTypeKey, "ICatalogueServices");
                     _scenarioContext.Add(ConstantsStepDefinitions.ServiceContextKey, ServiceFactory.GetA<ICatalogueServices>());
                     break;
                 default:
+                    _scenarioContext.Add(ConstantsStepDefinitions.InterfaceTypeKey, "ISampleService");
                     _scenarioContext.Add(ConstantsStepDefinitions.ServiceContextKey, ServiceFactory.GetA<ISampleService>());
                     break;
             }
@@ -64,6 +71,9 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
             Type serviceType;
             switch (interfaceName)
             {
+                case "ICartOperationsServices":
+                    serviceType= typeof(ICartOperationsServices);
+                    break;
                 case "ICatalogueServices":
                     serviceType = typeof(ICatalogueServices);
                     break;
@@ -74,12 +84,36 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
             Assert.NotNull(serviceType.GetMethods().FirstOrDefault(x => x.Name.Contains(operationName, StringComparison.InvariantCultureIgnoreCase)));
         }
 
+
+        private Type GetServiceType()
+        {
+            var serviceId = _scenarioContext.Get<string>(ConstantsStepDefinitions.InterfaceTypeKey);
+            Type serviceType;
+            switch (serviceId)
+            {
+                case "ICartOperationsServices":
+                    serviceType = _scenarioContext.Get<ICartOperationsServices>(ConstantsStepDefinitions.ServiceContextKey).GetType();
+                    break;
+                case "ICatalogueServices":
+                    serviceType = _scenarioContext.Get<ICatalogueServices>(ConstantsStepDefinitions.ServiceContextKey).GetType();
+                    break;
+                default:
+                    serviceType = _scenarioContext.Get<ISampleService>(ConstantsStepDefinitions.ServiceContextKey).GetType();
+                    break;
+            }
+            return serviceType;
+        }
+        private MethodInfo GetMethodInfo(Type serviceType, string operation)
+        {
+            var targetOperation = serviceType.Methods().Where(x => x.Name == operation).ToList().FirstOrDefault();
+            Assert.True(targetOperation != null, $"Operation {operation} is not available yet");
+            return targetOperation;
+        }
         [Then(@"(.*) operation will have a parameter (.*) inherating EntityRequest")]
         public void ThenAddProductOperationWillHaveAParameterAddProductRequestInheratingEntityRequest(string operation, string parameter)
         {
-            var catalogueServices = _scenarioContext.Get<ICatalogueServices>(ConstantsStepDefinitions.ServiceContextKey);
-            var targetOperation = catalogueServices.GetType().Methods().Where(x => x.Name == operation).ToList().FirstOrDefault();
-            Assert.True(targetOperation != null, $"Operation {operation} is not available yet");
+            var serviceType = GetServiceType();
+            var targetOperation = GetMethodInfo(serviceType,operation); 
             var requestType = targetOperation.GetParameters().FirstOrDefault(x => x.ParameterType.Name == parameter)?.ParameterType;
             Assert.True(requestType != null, $"Parameter {parameter} is not detected as part of the service");
             var requestInstance = Activator.CreateInstance(requestType) as EntityRequest;
@@ -89,9 +123,8 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
         [Then(@"(.*) operation will have an output (.*) inherating EntityResponse")]
         public void ThenAddProductOperationWillHaveAnOutputAddProductResponseInheratingEntityResponse(string operation, string returnedParameter)
         {
-            var catalogueServices = _scenarioContext.Get<ICatalogueServices>(ConstantsStepDefinitions.ServiceContextKey);
-            var targetOperation = catalogueServices.GetType().Methods().Where(x => x.Name == operation).ToList().FirstOrDefault();
-            Assert.True(targetOperation != null, $"Operation {operation} is not available yet");
+            var serviceType = GetServiceType();
+            var targetOperation = GetMethodInfo(serviceType, operation);
             var responseType = targetOperation.ReturnType;
             Assert.True(responseType.Name == returnedParameter, $"Returned parameter should {returnedParameter} and it is {responseType.Name}");
             var requestInstance = Activator.CreateInstance(responseType) as EntityResponse;

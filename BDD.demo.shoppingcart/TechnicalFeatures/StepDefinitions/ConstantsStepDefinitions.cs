@@ -12,5 +12,6 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
         public const string ServiceContextKey = "ServiceContextKey";
         public const string ResponseContextKey = "ResponseContextKey";
         public const string RequestContextKey = "RequestContextKey";
+        public const string InterfaceTypeKey = "InterfaceTypeKey";
     }
 }

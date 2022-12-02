@@ -29,20 +29,4 @@ Scenario: TranformPriceForPerson returns error when Person name is not defined
 	Given a TransformPriceForPersonRequest with an empty person name
 	When operation TranformPriceForPerson is invoked in ICartOperationsServices
 	Then the response HttpCode will be BadRequest
-	And response Error message will be 'Product name must be filled'
-	
-@CartOperationsServices
-@TranformPriceForPerson
-Scenario: TranformPriceForPerson returns error when From-currency is not defined
-	Given a TransformPriceForPersonRequest with an empty From currecy
-	When operation TranformPriceForPerson is invoked in ICartOperationsServices
-	Then the response HttpCode will be BadRequest
-	And response Error message will be 'Origin currency must be filled'
-
-@CartOperationsServices
-@TranformPriceForPerson
-Scenario: TranformPriceForPerson returns error when To-currency is not defined
-	Given a TransformPriceForPersonRequest with an empty To currecy
-	When operation TranformPriceForPerson is invoked in ICartOperationsServices
-	Then the response HttpCode will be BadRequest
-	And response Error message will be 'Origin currency must be filled'
+	And response Error message will be 'Persona name must be filled'
