@@ -25,7 +25,7 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             {
                 Product = new Product
                 {
-                    Name = row["productResponse"],
+                    Name = row["product"],
                     Price = double.Parse(row["price"]),
                     Currency = Enum.Parse<CurrencyType>(row["currency"]),
                     Discount = double.Parse(row["discount"].Replace("%", "")) / 100
@@ -100,7 +100,43 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             var response = ServiceFactory.GetA<ICatalogueServices>().UpsertPersona(request);
             Assert.True(response.HttpCode >= HttpStatusCode.OK && response.HttpCode <= HttpStatusCode.Accepted, response.ErrorMessage);
         }
-
+        [Given(@"I check in a product '([^']*)'")]
+        public void GivenICheckInAProduct(string productName)
+        {
+            var personaResponse = _scenarioContext.Get<GetPersonaResponse>(ConstantsStepDefinitions.GetPersonaResponseKey);
+            var productResponse = ServiceFactory.GetA<ICatalogueServices>().GetProductByName(new GetProductRequest { Product = new Product { Name = productName } });
+            Assert.True(productResponse.HttpCode == HttpStatusCode.OK, productResponse.ErrorMessage);
+            Assert.True(personaResponse.HttpCode == HttpStatusCode.OK, personaResponse.ErrorMessage);
+            Assert.NotNull(productResponse?.Product);
+            Assert.NotNull(personaResponse?.Persona);
+            personaResponse.Persona.CheckedOutProducts.Add(productResponse.Product);
+            ServiceFactory.GetA<ICatalogueServices>().UpsertPersona(new UpsertPersonaRequest { Persona = personaResponse.Persona });
+        }
+        [When(@"I list checked in products")]
+        public void WhenIListCheckedInProducts()
+        {
+            var personaResponse = _scenarioContext.Get<GetPersonaResponse>(ConstantsStepDefinitions.GetPersonaResponseKey);
+            var persona = personaResponse.Persona;
+            var service = ServiceFactory.GetA<ICatalogueServices>();
+            var getPersonaRequest = new GetPersonaRequest
+            {
+                Persona = persona != null ? (Persona)persona.Clone() : throw new InvalidOperationException("Persona is null")
+            };
+            personaResponse = service.GetPersonaByName(getPersonaRequest);
+            Assert.NotNull(personaResponse);
+            Assert.True(personaResponse.HttpCode == HttpStatusCode.OK, personaResponse.ErrorMessage);
+            _scenarioContext.Remove(ConstantsStepDefinitions.GetPersonaResponseKey);
+            _scenarioContext.Add(ConstantsStepDefinitions.GetPersonaResponseKey, personaResponse);
+        }
+        [Then(@"there will be a single product with code '([^']*)'")]
+        public void ThenThereWillBeASingleProductWithCode(string productName)
+        {
+            var personaResponse = _scenarioContext.Get<GetPersonaResponse>(ConstantsStepDefinitions.GetPersonaResponseKey);
+            Assert.True(personaResponse != null,"GetPersonaResponse is not in context. Have you invoked GetPersona service?");
+            Assert.True(personaResponse?.Persona != null, $"GetPersona has not Persona attached. Info:{personaResponse.HttpCode}, {personaResponse.ErrorMessage}");
+            var product = personaResponse?.Persona?.CheckedOutProducts.FirstOrDefault(x => x.Name== productName);
+            Assert.True(product != null, $"{productName} has not been found in checked products");
+        }
 
     }
 }
