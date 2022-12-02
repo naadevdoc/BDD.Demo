@@ -115,6 +115,14 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
         [Given(@"I add following products to my cart (.*) times")]
         public void GivenIAddFollowingProductsToMyCartTimes(int timesToAdd, Table table)
         {
+            for (int i = 0; i < timesToAdd; i++)
+            {
+                GivenIAddFollowingProductsToMyCart(table);
+            }
+        }
+        [Given(@"I add following products to my cart")]
+        public void GivenIAddFollowingProductsToMyCart(Table table)
+        {
             var personaResponse = ExtractGetPersonaResponseFromContext();
             var productNames = table.Rows.Select(x => x["product"]).ToList();
             var service = ServiceFactory.GetA<ICatalogueServices>();
@@ -127,10 +135,7 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
                 var getProductResponse = service.GetProductByName(getProductRequest);
                 Assert.True(getProductResponse.HttpCode == HttpStatusCode.OK, getProductResponse.ErrorMessage);
                 Assert.NotNull(getProductResponse?.Product);
-                for (int i = 0; i < timesToAdd; i++)
-                {
-                    personaResponse?.Persona?.CheckedOutProducts.Add(getProductResponse.Product);
-                }
+                personaResponse?.Persona?.CheckedOutProducts.Add(getProductResponse.Product);
             }
             service.UpsertPersona(new UpsertPersonaRequest { Persona = persona });
         }
