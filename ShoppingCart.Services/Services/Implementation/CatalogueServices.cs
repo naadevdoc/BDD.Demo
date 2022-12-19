@@ -25,14 +25,20 @@ namespace ShoppingCart.Services.Services.Implementation
         /// </summary>
         static IList<NamedEntity> Products = new List<NamedEntity>();
         /// <summary>
+        /// ExchangeRates stores the exchange rate between two currencies including fee and taxes
+        /// </summary>
+        static IList<ExchangeRate> ExchangeRates= new List<ExchangeRate>();
+        /// <summary>
         /// UpsertProduct will execute following operations
         /// 1) Validates if the request is correct
         /// 2) Once data is validated, upserts data in the dataset
         /// </summary>
         /// <param name="request">UpsertProductRequest with an entity Product to be upserted</param>
         /// <returns>UpsertProductResponse with HttpCode.Ok if succeeded, HttpCode.NotFound if not in catalogue and HttpCode.BadRequest if request has not properly created</returns>
-        public UpsertProductResponse UpsertProduct(UpsertProductRequest request) => request.ValidateRequest(new UpsertProductResponse())
-                                                                                           .ContinueWhenOk((response) => request.Product.UpsertIntoRepository(Products, response));
+        public UpsertProductResponse UpsertProduct(UpsertProductRequest request) => 
+            request.ValidateRequest(new UpsertProductResponse())
+                   .ContinueWhenOk((response) => request.Product.UpsertIntoRepository(Products, response))
+                   ;
         /// <summary>
         /// UpsertPersona will execute following operations
         /// 1) Validates if the request is correct
@@ -40,30 +46,48 @@ namespace ShoppingCart.Services.Services.Implementation
         /// </summary>
         /// <param name="request">UpsertPersonaRequest with an entity Persona to be upserted</param>
         /// <returns>UpsertPersonaResponse with HttpCode.Ok if succeeded and HttpCode.BadRequest if request has not properly created</returns>
-        public UpsertPersonaResponse UpsertPersona(UpsertPersonaRequest request) => request.ValidateRequest(new UpsertPersonaResponse())
-                                                                                           .ContinueWhenOk((response)=> request.Persona.UpsertIntoRepository(Personas, response));
-        public UpsertExchangeRateResponse UpsertExchangeRate(UpsertExchangeRateRequest request) => new UpsertExchangeRateResponse();
+        public UpsertPersonaResponse UpsertPersona(UpsertPersonaRequest request) => 
+            request.ValidateRequest(new UpsertPersonaResponse())
+                   .ContinueWhenOk((response)=> request.Persona.UpsertIntoRepository(Personas, response))
+                   ;
+        public UpsertExchangeRateResponse UpsertExchangeRate(UpsertExchangeRateRequest request) => 
+            request.ValidateRequest(new UpsertExchangeRateResponse())
+                   .ContinueWhenOk((response) => request.ExchangeRate.UpsertIntoRepository(ExchangeRates,response))
+                   ;
         /// <summary>
         /// Finds a persona if exists by name
         /// </summary>
         /// <param name="request">GetPersonaRequest with a Persona. Only Name is needed. All other properties are ignored</param>
         /// <returns>GetPersonaResponse with stored persona and HttpCode.Ok if found and HttpCode.BadRequest if there is any error in request</returns>
-        public GetPersonaResponse GetPersonaByName(GetPersonaRequest request) => request.ValidateRequest(new GetPersonaResponse())
-                                                                                        .ContinueWhenOk((response) => SetResponse(response, request));
+        public GetPersonaResponse GetPersonaByName(GetPersonaRequest request) => 
+            request.ValidateRequest(new GetPersonaResponse())
+                   .ContinueWhenOk((response) => SearchAndSetResponse(response, request))
+                   ;
         /// <summary>
         /// Finds a product if exists from product catalog by name
         /// </summary>
         /// <param name="request">GetPersonaRequest with a Persona. Only Name is needed. All other properties are ignored</param>
         /// <returns>GetProductResponse with product in catalog and Http.Ok if found, HttpCode.NotFound if not in catalogue and HttpCode.BadRequest if there is any error in request</returns>
-        public GetProductResponse GetProductByName(GetProductRequest request) => request.ValidateRequest(new GetProductResponse())
-                                                                                        .ContinueWhenOk((response) => SetResponse(response, request));
+        public GetProductResponse GetProductByName(GetProductRequest request) => 
+            request.ValidateRequest(new GetProductResponse())
+                   .ContinueWhenOk((response) => SearchAndSetResponse(response, request))
+                   ;
+        /// <summary>
+        /// Obtains Exchagerate from the repository
+        /// </summary>
+        /// <param name="request">GetExchangeRateRequest with the From and To currencies</param>
+        /// <returns>GetExchangeRateResponse with product in catalog and Http.Ok if found, HttpCode.NotFound if not in catalogue and HttpCode.BadRequest if there is any error in request</returns>
+        public GetExchangeRateResponse GetExchangeRate(GetExchangeRateRequest request) =>
+            request.ValidateRequest(new GetExchangeRateResponse())
+                   .ContinueWhenOk((response) => SearchAndSetResponse(response, request))
+                   ;
         /// <summary>
         /// Actions driven to fill GetPersonaResponse. It will include Persona when found or NotFound and an custom error message when not found
         /// </summary>
         /// <param name="response">The response to be filled</param>
         /// <param name="request">A valid request</param>
         /// <returns>Filled response</returns>
-        private GetPersonaResponse SetResponse(GetPersonaResponse response, GetPersonaRequest request)
+        private GetPersonaResponse SearchAndSetResponse(GetPersonaResponse response, GetPersonaRequest request)
         {
             response.Persona = SearchByName<Persona>(Personas, request.GetNameFromNamedEntity());
             return response.Persona == null ? response.SetHttpCodeWithError(HttpStatusCode.NotFound, $"Persona with name {request.GetNameFromNamedEntity()} is not found") : response;
@@ -74,7 +98,7 @@ namespace ShoppingCart.Services.Services.Implementation
         /// <param name="response">The response to be filled</param>
         /// <param name="request">A valid request</param>
         /// <returns>Filled response</returns>
-        private GetProductResponse SetResponse(GetProductResponse response,GetProductRequest request)
+        private GetProductResponse SearchAndSetResponse(GetProductResponse response,GetProductRequest request)
         {
             response.Product = SearchByName<Product>(Products, request.GetNameFromNamedEntity());
             return response.Product == null ? response.SetHttpCodeWithError(HttpStatusCode.NotFound, $"Product {request.GetNameFromNamedEntity()} is no longer in catalogue") : response;
@@ -91,5 +115,16 @@ namespace ShoppingCart.Services.Services.Implementation
         {
             return (Y?)(namedEntities.FirstOrDefault(x => x.Name.Equals(name, StringComparison.Ordinal))?.Clone());
         }
+
+        private GetExchangeRateResponse SearchAndSetResponse(GetExchangeRateResponse response, GetExchangeRateRequest request)
+        {
+            var exchangeRate = ExchangeRates.FirstOrDefault(x => request?.FromCurrency == x.FromCurrency 
+                                                                      &&
+                                                                      request?.ToCurrency == x.ToCurrency);
+            var errorMessage = exchangeRate == null ? $"{request?.FromCurrency} to {request?.ToCurrency} is not supported in currency system" : string.Empty;
+            response.ExchangeRate = exchangeRate;
+            return response.SetHttpCodeWithError(exchangeRate == null ? HttpStatusCode.NotFound : HttpStatusCode.OK, errorMessage);
+        }
+
     }
 }

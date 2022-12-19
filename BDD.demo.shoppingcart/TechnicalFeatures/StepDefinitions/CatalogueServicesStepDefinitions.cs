@@ -35,9 +35,86 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
             var product = new Product { Name = name };
             _scenarioContext.Add(ConstantsStepDefinitions.RequestContextKey, new GetProductRequest { Product = product });
         }
+        private GetExchangeRateRequest InitializeOrObtainExchangeRequest()
+        {
+            bool doesexist = _scenarioContext.TryGetValue(ConstantsStepDefinitions.RequestContextKey, out GetExchangeRateRequest exchangeRate);
+            exchangeRate = doesexist ? exchangeRate : new GetExchangeRateRequest { };
+            _scenarioContext[ConstantsStepDefinitions.RequestContextKey] = exchangeRate;
+            return exchangeRate;
+        }
+        private UpsertExchangeRateRequest InitializeOrObtainUpsertExchangeRequest()
+        {
+            bool doesexist = _scenarioContext.TryGetValue(ConstantsStepDefinitions.RequestContextKey, out UpsertExchangeRateRequest upsertRequest);
+            upsertRequest = doesexist ? upsertRequest : new UpsertExchangeRateRequest { };
+            _scenarioContext[ConstantsStepDefinitions.RequestContextKey] = upsertRequest;
+            return upsertRequest;
+        }
+        [Given(@"an unitialized UpsertExchangeRate")]
+        public void GivenAnUnitializedUpsertExchangeRate()
+        {
+            InitializeOrObtainUpsertExchangeRequest();
+        }
+
+        [Given(@"Source currency is (.*)")]
+        public void GivenSourceCurrencyIsEUR(CurrencyType currency)
+        {
+            var request = InitializeOrObtainUpsertExchangeRequest();
+            request.ExchangeRate.FromCurrency= currency;
+        }
+        [Given(@"Destiny currency is (.*)")]
+        public void GivenDestinyCurrencyIsUSD(CurrencyType currency)
+        {
+            var request = InitializeOrObtainUpsertExchangeRequest();
+            request.ExchangeRate.ToCurrency = currency;
+        }
+        [Given(@"Rate (.*)")]
+        public void GivenRate(double rate)
+        {
+            var request = InitializeOrObtainUpsertExchangeRequest();
+            request.ExchangeRate.Rate = rate;
+        }
+
+        [When(@"operation UpserExchangeRate is invoked in ICatalogueServices")]
+        public void WhenOperationUpserExchangeRateIsInvokedInICatalogueServices()
+        {
+            var request = InitializeOrObtainUpsertExchangeRequest();
+            var service = ServiceFactory.GetA<ICatalogueServices>();
+            var response = service.UpsertExchangeRate(request);
+            _scenarioContext.Add(ConstantsStepDefinitions.ResponseContextKey, response);
+        }
 
 
-  [When(@"operation GetPersonaByName is invoked in ICatalogueServices")]
+        [Given(@"an GetExchangeRateRequest where Source Currency is (.*)")]
+        public void GivenAnGetExchangeRateRequestWhereSourceCurrencyIs(CurrencyType currency)
+        {
+            var request = InitializeOrObtainExchangeRequest();
+            request.FromCurrency = currency;
+        }
+
+        [Given(@"an GetExchangeRateRequest where Destiny Currency is (.*)")]
+        public void GivenAnGetExchangeRateRequestWhereDestinyCurrencyIs(CurrencyType currency)
+        {
+            var request = InitializeOrObtainExchangeRequest();
+            request.ToCurrency = currency;
+        }
+
+
+        [Given(@"an unitialized GetExchangeRateRequest")]
+        public void GivenAnUnitializedGetExchangeRateRequest()
+        {
+            InitializeOrObtainExchangeRequest();
+        }
+        [Given(@"a request to get Exchange Rate from (.*) to (.*)")]
+        public void GivenARequestToGetExchangeRateFromJPYToEUR(CurrencyType source, CurrencyType destiny)
+        {
+            var request = InitializeOrObtainExchangeRequest();
+            request.FromCurrency = source; 
+            request.ToCurrency = destiny;
+            _scenarioContext[ConstantsStepDefinitions.RequestContextKey] = request;
+        }
+
+
+        [When(@"operation GetPersonaByName is invoked in ICatalogueServices")]
         public void WhenOperationGetPersonaIsInvokedInICatalogueServices()
         {
             var request = _scenarioContext.Get<GetPersonaRequest>(ConstantsStepDefinitions.RequestContextKey);
@@ -61,6 +138,15 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
             var response = service.GetTrue(request);
             _scenarioContext.Add(ConstantsStepDefinitions.ResponseContextKey, response);
         }
+        [When(@"operation GetExchangeRate is invoked in ICatalogueServices")]
+        public void WhenOperationGetExchangeRateIsInvokedInICatalogueServices()
+        {
+            var request = InitializeOrObtainExchangeRequest();
+            var service = ServiceFactory.GetA<ICatalogueServices>();
+            var response = service.GetExchangeRate(request);
+            _scenarioContext.Add(ConstantsStepDefinitions.ResponseContextKey, response);
+        }
+
 
         [Then(@"the response will be of type (.*) which inherates EntityResponse")]
         public void ThenTheResponseWillBeOfTypeSampleResponseWhichInheratesEntityResponse(string responseTypeName)
@@ -160,14 +246,22 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
         public void ThenTheResponseHttpCodeWillBe(HttpStatusCode httpCode)
         {
             var response = _scenarioContext.Get<EntityResponse>(ConstantsStepDefinitions.ResponseContextKey);
-            Assert.True(response.HttpCode == httpCode);
+            Assert.True(response.HttpCode == httpCode, $"expected HttpCode is {httpCode}, but returned was {response.HttpCode}");
         }
         [Then(@"response Error message will be '([^']*)'")]
         public void ThenResponseErrorMessageWillBe(string message)
         {
             var response = _scenarioContext.Get<EntityResponse>(ConstantsStepDefinitions.ResponseContextKey);
-            Assert.True(response.ErrorMessage == message);
+            Assert.True(response.ErrorMessage == message, $"expected ErrorMessage is {message}, but returned was {response.ErrorMessage}");
         }
+        [Then(@"response Rate will be (.*)")]
+        public void ThenResponseRateWillBe(double rate)
+        {
+            var response = _scenarioContext.Get<GetExchangeRateResponse>(ConstantsStepDefinitions.ResponseContextKey);
+            Assert.NotNull(response.ExchangeRate);
+            Assert.True(rate == response.ExchangeRate.Rate);
+        }
+
 
         [When(@"an operation UpsertPersona is invoked with a null request")]
         public void WhenAnOperationUpsertPersonaIsInvokedWithANullRequest()
