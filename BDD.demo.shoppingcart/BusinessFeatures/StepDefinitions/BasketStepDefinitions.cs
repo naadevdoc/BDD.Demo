@@ -184,7 +184,7 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
         public void ThenIWillReceiveAMessage(string message)
         {
             var commitPurchaseResponse = _scenarioContext.Get<CommitPurchaseResponse>(ConstantsStepDefinitions.CommitPurchaseResponse);
-            Assert.True(commitPurchaseResponse.HttpCode == HttpStatusCode.OK);
+            Assert.True(commitPurchaseResponse.HttpCode == HttpStatusCode.OK || commitPurchaseResponse.HttpCode == HttpStatusCode.NoContent);
             Assert.True(commitPurchaseResponse.PurchaseMessage == message, $"Expected '${message}' but obtained '${commitPurchaseResponse.PurchaseMessage}'");
         }
 

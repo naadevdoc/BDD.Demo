@@ -18,7 +18,7 @@ namespace ShoppingCart.Services.Services.Implementation
         public CommitPurchaseResponse CommitPurchase(CommitPurchaseRequest request)
         {
             var response = request.InitializeResponse(new CommitPurchaseResponse());
-            return ExecutePurchase(response);
+            return ExecutePurchaseAndSetMessage(response);
         } 
 
         public TransformPriceForPersonResponse TranformPriceForPerson(TransformPriceForPersonRequest request)
@@ -27,11 +27,11 @@ namespace ShoppingCart.Services.Services.Implementation
             return response.ContinueWhenOk(response => AlignCurrency(response))
                            ;
         }
-        private CommitPurchaseResponse ExecutePurchase(CommitPurchaseResponse response)
+        private CommitPurchaseResponse ExecutePurchaseAndSetMessage(CommitPurchaseResponse response)
         {
             response.PurchaseMessage = response.HttpCode == HttpStatusCode.OK ? "Thank you for your purchase" :
+                          response.HttpCode == HttpStatusCode.NoContent ? "There are no items to purchase" :
                           string.Empty;
-            response.HttpCode = string.IsNullOrEmpty(response.PurchaseMessage) ? response.HttpCode : HttpStatusCode.OK;
             return response;
         }
 
