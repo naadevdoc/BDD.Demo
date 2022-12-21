@@ -10,7 +10,7 @@ namespace ShoppingCart.Services.Model.CatalogueService.Extensions
 {
     internal static class GetExchangeRequestExtensions
     {
-        public static GetExchangeRateResponse ValidateRequest(this GetExchangeRateRequest request, GetExchangeRateResponse defaultResponse)
+        internal static GetExchangeRateResponse ValidateRequest(this GetExchangeRateRequest request, GetExchangeRateResponse defaultResponse)
         {
             var errorMessage = request == null ? "Request must be initialized" :
                                     request.FromCurrency == null && request.ToCurrency == null ? "Exchange Rate Request has not been initialized" :

@@ -14,14 +14,6 @@ Scenario Outline: Cart Operation Services
 Examples: 
 	| Operation              | RequestName                    | ResponseName                    |
 	| TranformPriceForPerson | TransformPriceForPersonRequest | TransformPriceForPersonResponse |
-
-@CartOperationsServices
-@TranformPriceForPerson
-Scenario: TranformPriceForPerson returns error when Product name is not defined
-	Given a TransformPriceForPersonRequest with an empty product name
-	When operation TranformPriceForPerson is invoked in ICartOperationsServices
-	Then the response HttpCode will be BadRequest
-	And response Error message will be 'Product name must be filled'
 	
 @CartOperationsServices
 @TranformPriceForPerson
@@ -30,3 +22,26 @@ Scenario: TranformPriceForPerson returns error when Person name is not defined
 	When operation TranformPriceForPerson is invoked in ICartOperationsServices
 	Then the response HttpCode will be BadRequest
 	And response Error message will be 'Persona name must be filled'
+
+
+@CartOperationsServices
+@TranformPriceForPerson
+Scenario: TranformPriceForPerson returns Empty when persona has no products
+	Given these personas are registered
+	  | Name        | Fidelity discount | Preferred currency |
+	  | David       | 0%                | EUR                |
+	And a TransformPriceForPersonRequest for David
+	When operation TranformPriceForPerson is invoked in ICartOperationsServices
+	Then the response HttpCode will be NoContent
+	And response Error message will be 'There are no items in cart'
+
+@CartOperationsServices
+@TranformPriceForPerson
+Scenario: TranformPriceForPerson returns Empty when persona does not exist
+	Given these personas are registered
+	  | Name        | Fidelity discount | Preferred currency |
+	  | David       | 0%                | EUR                |
+	And a TransformPriceForPersonRequest for Carl
+	When operation TranformPriceForPerson is invoked in ICartOperationsServices
+	Then the response HttpCode will be NotFound
+	And response Error message will be 'User not found'

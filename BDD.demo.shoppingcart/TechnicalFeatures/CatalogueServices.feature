@@ -101,7 +101,7 @@ Scenario: A Exchange Rate Request on a non supported currency will return error
 	And a request to get Exchange Rate from EUR to EUR
 	When operation GetExchangeRate is invoked in ICatalogueServices
 	Then the response HttpCode will be NotFound
-	And response Error message will be 'JPY to EUR is not supported in currency system'
+	And response Error message will be 'EUR to EUR is not supported in currency system'
 
 
 @CatalogueServices

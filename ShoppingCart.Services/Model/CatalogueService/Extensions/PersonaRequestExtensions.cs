@@ -11,7 +11,7 @@ namespace ShoppingCart.Services.Model.CatalogueService.Extensions
 {
     internal static class PersonaRequestExtensions 
     {
-        public static Z ValidateRequest<T,Z>(this T request, Z defaultResponse) where T : PersonaRequest where Z : PersonaResponse
+        internal static Z ValidateRequest<T,Z>(this T request, Z defaultResponse) where T : PersonaRequest where Z : PersonaResponse
         {
             defaultResponse.ErrorMessage = request == null ? "Request must be initialized" :
                                     request?.Persona == null ? "Persona must be different than null in request" :

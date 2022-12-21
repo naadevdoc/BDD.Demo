@@ -10,6 +10,7 @@ namespace ShoppingCart.Services.Model.Entities
     {
         EUR,
         USD,
-        JPY
+        JPY,
+        ERR
     }
 }

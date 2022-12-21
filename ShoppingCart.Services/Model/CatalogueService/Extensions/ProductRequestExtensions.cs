@@ -11,7 +11,7 @@ namespace ShoppingCart.Services.Model.CatalogueService.Extensions
 {
     internal static class ProductRequestExtensions 
     {
-        public static Z ValidateRequest<T,Z>(this T request, Z defaultResponse) where T : ProductRequest where Z : ProductResponse
+        internal static Z ValidateRequest<T,Z>(this T request, Z defaultResponse) where T : ProductRequest where Z : ProductResponse
         {
             defaultResponse.ErrorMessage = request == null ? "Request must be initialized" :
                                     request?.Product == null ? "Product must be different than null in request" :

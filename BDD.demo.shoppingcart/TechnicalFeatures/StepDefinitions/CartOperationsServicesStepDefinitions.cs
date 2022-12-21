@@ -36,9 +36,15 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
         [Given(@"a TransformPriceForPersonRequest with an empty person name")]
         public void GivenATransformPriceForPersonRequestWithAnEmptyPersonName()
         {
+            var request = new TransformPriceForPersonRequest();
+            _context.Add(ConstantsStepDefinitions.RequestContextKey, request);
+        }
+        [Given(@"a TransformPriceForPersonRequest for (.*)")]
+        public void GivenATransformPriceForPersonRequestForCarl(string person)
+        {
             var request = new TransformPriceForPersonRequest
             {
-                ProductName = "boo",
+                PersonaName = person,
             };
             _context.Add(ConstantsStepDefinitions.RequestContextKey, request);
         }

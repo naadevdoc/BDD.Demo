@@ -10,7 +10,7 @@ namespace ShoppingCart.Services.Model.CatalogueService.Extensions
 {
     internal static class UpsertExchangeRateRequestExtensions
     {
-        public static UpsertExchangeRateResponse ValidateRequest(this UpsertExchangeRateRequest request, UpsertExchangeRateResponse defaultResponse)
+        internal static UpsertExchangeRateResponse ValidateRequest(this UpsertExchangeRateRequest request, UpsertExchangeRateResponse defaultResponse)
         {
            var errorMessage = request == null || request?.ExchangeRate == null || request.ExchangeRateIsJustCreated() ? "UpsertExchangeRate has not been initialized" :
                         request?.ExchangeRate?.Rate == null ? "Rate has not been initialized" :

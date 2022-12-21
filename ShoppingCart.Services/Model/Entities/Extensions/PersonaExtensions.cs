@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ShoppingCart.Services.Model.OperationsService;
+using ShoppingCart.Services.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -7,14 +9,18 @@ using System.Threading.Tasks;
 
 namespace ShoppingCart.Services.Model.Entities.Extensions
 {
-    public static class PersonaExtensions
+    internal static class PersonaExtensions
     {
-        public static TotalAggregation GetTotal(this Persona persona)
+        internal static TotalAggregation GetTotal(this Persona persona)
         {
             var total = 0.0;
-            var currency = CurrencyType.EUR;
-            persona.CheckedOutProducts.ForEach(product => total += product.Price);
-            return new TotalAggregation { Total = total, Currency = currency };
+            var transformationRequest = new TransformPriceForPersonRequest
+            {
+                PersonaName = persona.Name
+            };
+            var transformationResponse = ServiceFactory.GetA<ICartOperationsServices>().TranformPriceForPerson(transformationRequest);            
+            transformationResponse?.Persona?.CheckedOutProducts.ForEach(product => total += product.Price);
+            return new TotalAggregation { Total = total, Currency = persona.PreferredCurrency };
         }
     }
 }

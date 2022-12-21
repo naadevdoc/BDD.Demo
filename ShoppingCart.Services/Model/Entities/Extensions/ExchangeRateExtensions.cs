@@ -8,7 +8,7 @@ namespace ShoppingCart.Services.Model.Entities.Extensions
 {
     internal static class ExchangeRateExtensions
     {
-        public static T UpsertIntoRepository<T>(this ExchangeRate exchangeRate, IList<ExchangeRate> repository, T response)
+        internal static T UpsertIntoRepository<T>(this ExchangeRate exchangeRate, IList<ExchangeRate> repository, T response)
             where T : EntityResponse
         {
             lock (repository)

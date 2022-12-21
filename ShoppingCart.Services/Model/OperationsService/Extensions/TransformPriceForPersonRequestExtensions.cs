@@ -8,13 +8,12 @@ using System.Threading.Tasks;
 
 namespace ShoppingCart.Services.Model.OperationsService.Extensions
 {
-    public static class TransformPriceForPersonRequestExtensions
+    internal static class TransformPriceForPersonRequestExtensions
     {
-        public static TransformPriceForPersonResponse ValidateRequest(this TransformPriceForPersonRequest request, TransformPriceForPersonResponse defaultResponse) 
+        internal static TransformPriceForPersonResponse ValidateRequest(this TransformPriceForPersonRequest request, TransformPriceForPersonResponse defaultResponse) 
         {
             defaultResponse.ErrorMessage = request == null ? "Request must be initialized" :
                                     string.IsNullOrEmpty(request?.PersonaName) ? "Persona name must be filled" :
-                                    string.IsNullOrEmpty(request?.ProductName) ? "Product name must be filled" :
                                     string.Empty;
             return defaultResponse.SetHttpCode();
         }

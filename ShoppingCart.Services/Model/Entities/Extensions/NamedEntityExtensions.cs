@@ -9,7 +9,7 @@ namespace ShoppingCart.Services.Model.Entities.Extensions
 {
     internal static class NamedEntityExtensions
     {
-        public static T UpsertIntoRepository<T, Y>(this Y namedEntity,IList<NamedEntity> repository, T response)
+        internal static T UpsertIntoRepository<T, Y>(this Y namedEntity,IList<NamedEntity> repository, T response)
             where T : EntityResponse
             where Y : NamedEntity
         {
