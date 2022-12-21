@@ -24,14 +24,7 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
             _context.Add(ConstantsStepDefinitions.RequestContextKey, request);
         }
 
-        [When(@"operation TranformPriceForPerson is invoked in ICartOperationsServices")]
-        public void WhenOperationTranformPriceForPersonIsInvokedInICartOperationsServices()
-        {
-            var service = ServiceFactory.GetA<ICartOperationsServices>();
-            var request = _context.Get<TransformPriceForPersonRequest>(ConstantsStepDefinitions.RequestContextKey);
-            var response = service.TranformPriceForPerson(request);
-            _context.Add(ConstantsStepDefinitions.ResponseContextKey, response);
-        }
+
 
         [Given(@"a TransformPriceForPersonRequest with an empty person name")]
         public void GivenATransformPriceForPersonRequestWithAnEmptyPersonName()
@@ -48,6 +41,38 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
             };
             _context.Add(ConstantsStepDefinitions.RequestContextKey, request);
         }
+        [Given(@"a CommitPurchase with an empty person name")]
+        public void GivenACommitPurchaseWithAnEmptyPersonName()
+        {
+            var request = new CommitPurchaseRequest();
+            _context.Add(ConstantsStepDefinitions.RequestContextKey, request);
+        }
+        [Given(@"a CommitPurchaseRequest for (.*)")]
+        public void GivenACommitPurchaseRequestFor(string name)
+        {
+            var request = new CommitPurchaseRequest
+            {
+                PersonaName = name
+            };
+            _context.Add(ConstantsStepDefinitions.RequestContextKey, request);
+        }
 
+        [When(@"operation TranformPriceForPerson is invoked in ICartOperationsServices")]
+        public void WhenOperationTranformPriceForPersonIsInvokedInICartOperationsServices()
+        {
+            var service = ServiceFactory.GetA<ICartOperationsServices>();
+            var request = _context.Get<TransformPriceForPersonRequest>(ConstantsStepDefinitions.RequestContextKey);
+            var response = service.TranformPriceForPerson(request);
+            _context.Add(ConstantsStepDefinitions.ResponseContextKey, response);
+        }
+
+        [When(@"operation CommitPurchase is invoked in ICartOperationsServices")]
+        public void WhenOperationCommitPurchaseIsInvokedInICartOperationsServices()
+        {
+            var service = ServiceFactory.GetA<ICartOperationsServices>();
+            var request = _context.Get<CommitPurchaseRequest>(ConstantsStepDefinitions.RequestContextKey);
+            var response = service.CommitPurchase(request);
+            _context.Add(ConstantsStepDefinitions.ResponseContextKey, response);
+        }
     }
 }

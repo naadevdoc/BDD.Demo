@@ -2,8 +2,7 @@
 
 namespace ShoppingCart.Services.Model.OperationsService
 {
-    public class TransformPriceForPersonRequest : EntityRequest
+    public class TransformPriceForPersonRequest : PersonaRequest
     {
-        public string PersonaName = string.Empty;
     }
 }

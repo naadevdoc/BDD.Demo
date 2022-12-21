@@ -11,5 +11,6 @@ namespace ShoppingCart.Services.Services
     public interface ICartOperationsServices
     {
         public TransformPriceForPersonResponse TranformPriceForPerson(TransformPriceForPersonRequest request);
+        public CommitPurchaseResponse CommitPurchase(CommitPurchaseRequest request);
     }
 }

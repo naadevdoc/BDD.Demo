@@ -10,20 +10,22 @@ namespace ShoppingCart.Services.Model.Extensions
 {
     internal static class EntityResponseExtensions
     {
-        public static T SetHttpCode<T>(this T response) where T : EntityResponse
+        public static _EntityResponse SetHttpCode<_EntityResponse>(this _EntityResponse response) 
+            where _EntityResponse : EntityResponse
         {
             response.HttpCode = string.IsNullOrEmpty(response.ErrorMessage) ? HttpStatusCode.OK : HttpStatusCode.BadRequest;
             return response;
         }
-        public static T SetHttpCodeWithError<T>(this T response, HttpStatusCode httpStatusCode, string errorMessage) where T : EntityResponse
+        public static _EntityResponse SetHttpCodeWithError<_EntityResponse>(this _EntityResponse response, HttpStatusCode httpStatusCode, string errorMessage) 
+            where _EntityResponse : EntityResponse
         {
             response.HttpCode = httpStatusCode;
             response.ErrorMessage = errorMessage;
             return response;
         }
 
-        public static T ContinueWhenOk<T>(this T response, Func<T,T> whatToDo) 
-            where T : EntityResponse
+        public static _EntityResponse ContinueWhenOk<_EntityResponse>(this _EntityResponse response, Func<_EntityResponse,_EntityResponse> whatToDo) 
+            where _EntityResponse : EntityResponse
         {
             return response.HttpCode == HttpStatusCode.OK ? whatToDo(response) : response;
         }

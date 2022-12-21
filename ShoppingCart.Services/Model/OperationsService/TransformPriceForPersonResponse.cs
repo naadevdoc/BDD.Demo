@@ -2,8 +2,7 @@
 
 namespace ShoppingCart.Services.Model.OperationsService
 {
-    public class TransformPriceForPersonResponse : EntityResponse
+    public class TransformPriceForPersonResponse : PersonaResponse
     {
-        public Persona? Persona { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 using ShoppingCart.Services;
 using ShoppingCart.Services.Model.CatalogueService;
 using ShoppingCart.Services.Model.Entities;
+using ShoppingCart.Services.Model.OperationsService;
 using ShoppingCart.Services.Services;
 using System;
 using System.Diagnostics;
@@ -72,7 +73,7 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             listOfResponses.ToList().ForEach(response => Assert.True(response.HttpCode >= HttpStatusCode.OK, response.ErrorMessage));
         }
         [Given(@"I have signed in as (.*)")]
-        public void GivenIHaveSignedInAsDavid(string name)
+        public void GivenIHaveSignedInAs(string name)
         {
             var personaResponse = ServiceFactory.GetA<ICatalogueServices>().GetPersonaByName(new GetPersonaRequest { Persona = new Persona { Name = name } });
             Assert.True(personaResponse.HttpCode >= HttpStatusCode.OK && personaResponse.HttpCode <= HttpStatusCode.OK, personaResponse.ErrorMessage);
@@ -139,6 +140,15 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             }
             service.UpsertPersona(new UpsertPersonaRequest { Persona = persona });
         }
+        [When(@"I purchase my product")]
+        public void WhenIPurchaseMyProduct()
+        {
+            var persona = _scenarioContext.Get<GetPersonaResponse>(ConstantsStepDefinitions.GetPersonaResponseKey);
+            Assert.NotNull(persona.Persona);
+            var commitPurchaseRequest = new CommitPurchaseRequest { PersonaName = persona.Persona.Name };
+            var commitPurchaseResponse = ServiceFactory.GetA<ICartOperationsServices>().CommitPurchase(commitPurchaseRequest);
+            _scenarioContext.Add(ConstantsStepDefinitions.CommitPurchaseResponse, commitPurchaseResponse);
+        }
 
         [When(@"I list checked in products")]
         public void WhenIListCheckedInProducts()
@@ -170,6 +180,14 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             var product = personaResponse?.Persona?.CheckedOutProducts.FirstOrDefault(x => x.Name== productName);
             Assert.True(product != null, $"{productName} has not been found in checked products");
         }
+        [Then(@"I will receive a message '([^']*)'")]
+        public void ThenIWillReceiveAMessage(string message)
+        {
+            var commitPurchaseResponse = _scenarioContext.Get<CommitPurchaseResponse>(ConstantsStepDefinitions.CommitPurchaseResponse);
+            Assert.True(commitPurchaseResponse.HttpCode == HttpStatusCode.OK);
+            Assert.True(commitPurchaseResponse.PurchaseMessage == message, $"Expected '${message}' but obtained '${commitPurchaseResponse.PurchaseMessage}'");
+        }
+
 
         [Then(@"cart total will be (.*) (.*)")]
         [Then(@"total cost will be (.*) (.*)")]

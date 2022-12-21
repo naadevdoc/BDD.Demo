@@ -14,7 +14,27 @@ Scenario Outline: Cart Operation Services
 Examples: 
 	| Operation              | RequestName                    | ResponseName                    |
 	| TranformPriceForPerson | TransformPriceForPersonRequest | TransformPriceForPersonResponse |
+	| CommitPurchase         | CommitPurchaseRequest          | CommitPurchaseResponse          |
 	
+@CartOperationsServices
+@CommitPurchase
+Scenario: CommitPurchase returns error when Person name is not defined
+	Given a CommitPurchase with an empty person name
+	When operation CommitPurchase is invoked in ICartOperationsServices
+	Then the response HttpCode will be BadRequest
+	And response Error message will be 'Persona name must be filled'
+
+@CartOperationsServices
+@CommitPurchase
+Scenario: CommitPurchase returns Empty when persona has no products
+	Given these personas are registered
+	  | Name        | Fidelity discount | Preferred currency |
+	  | David       | 0%                | EUR                |
+	And a CommitPurchaseRequest for David
+	When operation CommitPurchase is invoked in ICartOperationsServices
+	Then the response HttpCode will be NoContent
+	And response Error message will be 'There are no items in cart'
+
 @CartOperationsServices
 @TranformPriceForPerson
 Scenario: TranformPriceForPerson returns error when Person name is not defined

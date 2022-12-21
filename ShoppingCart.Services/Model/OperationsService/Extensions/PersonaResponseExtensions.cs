@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace ShoppingCart.Services.Model.OperationsService.Extensions
 {
-    public static class TransformPriceForPersonResponseExtensions
+    public static class PersonaResponseExtensions
     {
-        internal static TransformPriceForPersonResponse CheckGetPersonaResponse(this TransformPriceForPersonResponse response, GetPersonaResponse getPersonaResponse)
+        internal static TPersonaResponse CheckGetPersonaResponse<TPersonaResponse>(this TPersonaResponse response, GetPersonaResponse getPersonaResponse) where TPersonaResponse : PersonaResponse
         {
             var products = getPersonaResponse?.Persona?.CheckedOutProducts;
-            var noProducts = products == null || products.Count == 0;
+            var noProducts = products == null || !products.Any();
             response.Persona = getPersonaResponse?.Persona;
             response = getPersonaResponse != null && getPersonaResponse.HttpCode == HttpStatusCode.NotFound ? response.SetHttpCodeWithError(HttpStatusCode.NotFound, "User not found") :
                        getPersonaResponse != null && getPersonaResponse.HttpCode != HttpStatusCode.OK ? response.SetHttpCodeWithError(getPersonaResponse.HttpCode, getPersonaResponse.ErrorMessage) :

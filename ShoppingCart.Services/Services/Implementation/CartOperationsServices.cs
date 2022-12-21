@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Ninject.Activation;
 using ShoppingCart.Services.Model.CatalogueService;
 using ShoppingCart.Services.Model.Entities;
 using ShoppingCart.Services.Model.Extensions;
@@ -14,25 +15,30 @@ namespace ShoppingCart.Services.Services.Implementation
 {
     internal class CartOperationsServices : ICartOperationsServices
     {
+        public CommitPurchaseResponse CommitPurchase(CommitPurchaseRequest request)
+        {
+            var response = request.InitializeResponse(new CommitPurchaseResponse());
+            return ExecutePurchase(response);
+        } 
+
         public TransformPriceForPersonResponse TranformPriceForPerson(TransformPriceForPersonRequest request)
         {
-            var response = request.ValidateRequest(new TransformPriceForPersonResponse());
-            var catalogueService = ServiceFactory.GetA<ICatalogueServices>();
-            var getPersonaRequest = new GetPersonaRequest
-            {
-                Persona = new Persona 
-                { 
-                    Name = request.PersonaName
-                }
-            };
-            var getPersonaResponse = catalogueService.GetPersonaByName(getPersonaRequest);
-            return response.ContinueWhenOk(response => response.CheckGetPersonaResponse(getPersonaResponse))
-                           .ContinueWhenOk(response => AlignCurrency(getPersonaResponse.Persona,response))
+            var response = request.InitializeResponse(new TransformPriceForPersonResponse());
+            return response.ContinueWhenOk(response => AlignCurrency(response))
                            ;
         }
-        private TransformPriceForPersonResponse AlignCurrency(Persona? persona, TransformPriceForPersonResponse response) 
+        private CommitPurchaseResponse ExecutePurchase(CommitPurchaseResponse response)
+        {
+            response.PurchaseMessage = response.HttpCode == HttpStatusCode.OK ? "Thank you for your purchase" :
+                          string.Empty;
+            response.HttpCode = string.IsNullOrEmpty(response.PurchaseMessage) ? response.HttpCode : HttpStatusCode.OK;
+            return response;
+        }
+
+        private TransformPriceForPersonResponse AlignCurrency(TransformPriceForPersonResponse response) 
         {
             HttpStatusCode httpCode = HttpStatusCode.OK;
+            Persona? persona = response.Persona;
             if (persona?.Clone() is Persona newPersona && response.HttpCode == HttpStatusCode.OK)
             {
                 var personaProducts = new List<Product>();
