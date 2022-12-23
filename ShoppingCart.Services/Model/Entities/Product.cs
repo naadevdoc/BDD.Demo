@@ -11,6 +11,7 @@ namespace ShoppingCart.Services.Model.Entities
         public double Price { get; set; } = 0.0;
         public CurrencyType Currency { get; set; } = CurrencyType.EUR;
         public double Discount { get; set; } = 0.0;
+        public double DiscountedPrice { get; internal set; } = 0.0;
 
         public override object Clone()
         {

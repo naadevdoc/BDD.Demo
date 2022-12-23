@@ -6,6 +6,7 @@ using ShoppingCart.Services.Services;
 using System;
 using System.Diagnostics;
 using System.Net;
+using System.Windows.Markup;
 using TechTalk.SpecFlow;
 
 namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
@@ -199,6 +200,16 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             var asExpected = gettotal.Total == total && gettotal.Currency == currency;
             Assert.True(asExpected, $"{total} {currency} was expected as total instead {gettotal.Total} {gettotal.Currency}");
         }
+        [Then(@"cart total will show a discount of (.*) (.*)")]
+        public void ThenCartTotalWillShowADiscountOfEUR(int discount, CurrencyType currency)
+        {
+            var personaResponse = ExtractGetPersonaResponseFromContext();
+            var gettotalDiscount = personaResponse.Persona?.TotalDiscount;
+            Assert.True(gettotalDiscount != null, "Persona total discount is null (not as bad as total)");
+            var asExpected = gettotalDiscount.Total == discount && gettotalDiscount.Currency == currency;
+            Assert.True(asExpected, $"{discount} {currency} was expected as total instead {gettotalDiscount.Total} {gettotalDiscount.Currency}");
+        }
+
         [Then(@"following products will be found")]
         public void ThenFollowingProductsWillBeFound(Table table)
         {

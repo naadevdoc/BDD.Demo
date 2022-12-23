@@ -17,5 +17,11 @@ namespace ShoppingCart.Services.Model.Entities.Extensions
             persona.CheckedOutProducts.ForEach(product => total += product.Price);
             return new TotalAggregation { Total = total, Currency = persona.PreferredCurrency };
         }
+        internal static TotalAggregation GetTotalDiscount(this Persona persona)
+        {
+            var totalDiscount = 0.0;
+            persona.CheckedOutProducts.ForEach(product => totalDiscount += product.DiscountedPrice);
+            return new TotalAggregation { Total = totalDiscount, Currency = persona.PreferredCurrency };
+        }
     }
 }

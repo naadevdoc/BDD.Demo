@@ -17,6 +17,11 @@ namespace ShoppingCart.Services.Model.Entities
             get { return this.GetTotal(); }
         }
 
+        public TotalAggregation TotalDiscount
+        {
+            get { return this.GetTotalDiscount(); }
+        }
+
         public override object Clone()
         {
 

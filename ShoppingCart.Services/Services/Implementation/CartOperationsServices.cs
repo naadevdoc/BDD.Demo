@@ -56,7 +56,10 @@ namespace ShoppingCart.Services.Services.Implementation
                                                                      .ToList();
                 personaProducts.AddRange(transformedProducts);
                 personaProducts.AddRange(notTransformedProducts);
-                personaProducts.ForEach(x => x.Price *= (double)(1- x.Discount));
+                personaProducts.ForEach(x => x.DiscountedPrice += x.Price * (0 + x.Discount));
+                personaProducts.ForEach(x => x.DiscountedPrice += x.Price * (0 + persona.FidelityDiscount));
+                personaProducts.ForEach(x => x.Price *= (double)(1 - x.Discount)) ;
+                personaProducts.ForEach(x => x.Price *= (double)(1-persona.FidelityDiscount));
                 persona.CheckedOutProducts = persona?.CheckedOutProducts != null ? personaProducts : throw new InvalidCastException();
                 response.HttpCode= httpCode;
                 response.ErrorMessage = httpCode != HttpStatusCode.OK ? "Something went wrong when transforming currency" : string.Empty;
