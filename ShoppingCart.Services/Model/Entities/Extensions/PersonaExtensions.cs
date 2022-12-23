@@ -15,12 +15,14 @@ namespace ShoppingCart.Services.Model.Entities.Extensions
         {
             var total = 0.0; 
             persona.CheckedOutProducts.ForEach(product => total += product.Price);
+            total = persona.FidelityDiscount != 0 ? total * (double)(1 - persona.FidelityDiscount) : total;
             return new TotalAggregation { Total = total, Currency = persona.PreferredCurrency };
         }
         internal static TotalAggregation GetTotalDiscount(this Persona persona)
         {
-            var totalDiscount = 0.0;
-            persona.CheckedOutProducts.ForEach(product => totalDiscount += product.DiscountedPrice);
+            var total = 0.0;
+            persona.CheckedOutProducts.ForEach(product => total += product.Price);
+            var totalDiscount = total - persona.GetTotal().Total;
             return new TotalAggregation { Total = totalDiscount, Currency = persona.PreferredCurrency };
         }
     }

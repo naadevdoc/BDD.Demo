@@ -123,12 +123,12 @@ Scenario: Delta09->Product discount does not apply for personas with fidelity di
 	And I add following products to my cart
 	 | product                 |
 	 | motion-cam-hero-10-2021 |
-	 | motion-cam-hero-9-2019  |
+	 | motion-cam-hero-09-2019 |
 	When I list checked in products
 	Then following products will be found
-	 | product                | price |
-	 | motion-cam-hero-9-2019 | 10    |
-	 | motion-cam-hero-9-2019 | 10    |
+	 | product                 | price |
+	 | motion-cam-hero-09-2019 | 10    |
+	 | motion-cam-hero-09-2019 | 10    |
 	And cart total will be 16 EUR
 	And cart total will show a discount of 4 EUR
 

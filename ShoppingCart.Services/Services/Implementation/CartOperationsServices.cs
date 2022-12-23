@@ -43,9 +43,9 @@ namespace ShoppingCart.Services.Services.Implementation
             {
                 var personaProducts = new List<Product>();
                 var doNotModifyTheseProducts = newPersona?.CheckedOutProducts != null ? newPersona.CheckedOutProducts.Where(x => x.Currency == newPersona.PreferredCurrency).Select(x => x.Clone() as Product).ToList() : new List<Product?>();
-                var modifyTheseProducts = newPersona?.CheckedOutProducts != null ? newPersona.CheckedOutProducts.Where(x => x.Currency != newPersona.PreferredCurrency).Select(x => x.Clone() as Product).ToList() : new List<Product?>();
-                httpCode = doNotModifyTheseProducts.Any(x => x == null) || modifyTheseProducts.Any(x => x == null) ? HttpStatusCode.InternalServerError : HttpStatusCode.OK;
-                var transformedProducts = modifyTheseProducts.Where(x => x != null)
+                var currencyToChangeProducts = newPersona?.CheckedOutProducts != null ? newPersona.CheckedOutProducts.Where(x => x.Currency != newPersona.PreferredCurrency).Select(x => x.Clone() as Product).ToList() : new List<Product?>();
+                httpCode = doNotModifyTheseProducts.Any(x => x == null) || currencyToChangeProducts.Any(x => x == null) ? HttpStatusCode.InternalServerError : HttpStatusCode.OK;
+                var unifiedCurrencyProducts = currencyToChangeProducts.Where(x => x != null)
                                                              .Select(x => x != null ? (Product)x.Clone() : throw new InvalidCastException())
                                                              .Select(x => ProductTransformProduct(x,persona?.PreferredCurrency))
                                                              .Where(x => x !=null)
@@ -54,12 +54,12 @@ namespace ShoppingCart.Services.Services.Implementation
                 var notTransformedProducts = doNotModifyTheseProducts.Where(x => x != null)
                                                                      .Select(x => x != null ? (Product)x.Clone() : throw new InvalidCastException())
                                                                      .ToList();
-                personaProducts.AddRange(transformedProducts);
+                personaProducts.AddRange(unifiedCurrencyProducts);
                 personaProducts.AddRange(notTransformedProducts);
-                personaProducts.ForEach(x => x.DiscountedPrice += x.Price * (0 + x.Discount));
-                personaProducts.ForEach(x => x.DiscountedPrice += x.Price * (0 + persona.FidelityDiscount));
-                personaProducts.ForEach(x => x.Price *= (double)(1 - x.Discount)) ;
-                personaProducts.ForEach(x => x.Price *= (double)(1-persona.FidelityDiscount));
+                personaProducts.ForEach(x => x.DiscountedPrice = persona.FidelityDiscount == 0 ? x.Price * (0 + x.Discount) : x.DiscountedPrice);
+                personaProducts.ForEach(x => x.Price = persona.FidelityDiscount == 0 ? x.Price * (double)(1 - x.Discount) : x.Price);
+                //personaProducts.ForEach(x => x.DiscountedPrice += x.Price * (0 + persona.FidelityDiscount));
+                //personaProducts.ForEach(x => x.Price *= (double)(1-persona.FidelityDiscount));
                 persona.CheckedOutProducts = persona?.CheckedOutProducts != null ? personaProducts : throw new InvalidCastException();
                 response.HttpCode= httpCode;
                 response.ErrorMessage = httpCode != HttpStatusCode.OK ? "Something went wrong when transforming currency" : string.Empty;
