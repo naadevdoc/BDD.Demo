@@ -15,7 +15,7 @@ Background:
 	  | Maria       | 20%               | EUR                |
 	  | Paul        | 0%                | USD                |
 	  | Oshiro      | 10%               | JPY                |
-	  | Jules       | 5%                | JPY                |
+	  | Jules       | 5%                | USD                |
 	And the exchange rate at the time of operation is as follows
 	  | From Currency | To Currency | Rate    |
 	  | EUR           | USD         | 1.134   |
