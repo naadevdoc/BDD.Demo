@@ -1,4 +1,6 @@
 using ShoppingCart.Services;
+using ShoppingCart.Services.Model.CatalogueService;
+using ShoppingCart.Services.Model.Entities;
 using ShoppingCart.Services.Model.OperationsService;
 using ShoppingCart.Services.Services;
 using System;
@@ -17,9 +19,17 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
         [Given(@"a TransformPriceForPersonRequest with an empty product name")]
         public void GivenATransformPriceForPersonRequestWithAnEmptyProductName()
         {
+            var getPersonaRequest = new GetPersonaRequest
+            {
+                Persona = new Persona
+                {
+                    Name = "boo"
+                }
+            };
+            var getPersonaResponse = ServiceFactory.GetA<ICatalogueServices>().GetPersonaByName(getPersonaRequest);
             var request = new TransformPriceForPersonRequest
             {
-                PersonaName = "boo",
+                GetPersonaResponse = getPersonaResponse,
             };
             _context.Add(ConstantsStepDefinitions.RequestContextKey, request);
         }
@@ -33,11 +43,19 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
             _context.Add(ConstantsStepDefinitions.RequestContextKey, request);
         }
         [Given(@"a TransformPriceForPersonRequest for (.*)")]
-        public void GivenATransformPriceForPersonRequestForCarl(string person)
+        public void GivenATransformPriceForPersonRequestForCarl(string name)
         {
+            var getPersonaRequest = new GetPersonaRequest
+            {
+                Persona = new Persona
+                {
+                    Name = name
+                }
+            };
+            var getPersonaResponse = ServiceFactory.GetA<ICatalogueServices>().GetPersonaByName(getPersonaRequest);
             var request = new TransformPriceForPersonRequest
             {
-                PersonaName = person,
+                GetPersonaResponse = getPersonaResponse,
             };
             _context.Add(ConstantsStepDefinitions.RequestContextKey, request);
         }
@@ -50,9 +68,17 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
         [Given(@"a CommitPurchaseRequest for (.*)")]
         public void GivenACommitPurchaseRequestFor(string name)
         {
+            var getPersonaRequest = new GetPersonaRequest
+            {
+                Persona = new Persona
+                {
+                    Name = name
+                }
+            };
+            var getPersonaResponse = ServiceFactory.GetA<ICatalogueServices>().GetPersonaByName(getPersonaRequest);
             var request = new CommitPurchaseRequest
             {
-                PersonaName = name
+                GetPersonaResponse = getPersonaResponse
             };
             _context.Add(ConstantsStepDefinitions.RequestContextKey, request);
         }

@@ -63,5 +63,5 @@ Scenario: TranformPriceForPerson returns Empty when persona does not exist
 	  | David       | 0%                | EUR                |
 	And a TransformPriceForPersonRequest for Carl
 	When operation TranformPriceForPerson is invoked in ICartOperationsServices
-	Then the response HttpCode will be NotFound
-	And response Error message will be 'User not found'
+	Then the response HttpCode will be BadRequest
+	And response Error message will be 'Persona name must be filled'

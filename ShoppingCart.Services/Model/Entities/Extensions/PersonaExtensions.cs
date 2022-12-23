@@ -13,13 +13,8 @@ namespace ShoppingCart.Services.Model.Entities.Extensions
     {
         internal static TotalAggregation GetTotal(this Persona persona)
         {
-            var total = 0.0;
-            var transformationRequest = new TransformPriceForPersonRequest
-            {
-                PersonaName = persona.Name
-            };
-            var transformationResponse = ServiceFactory.GetA<ICartOperationsServices>().TranformPriceForPerson(transformationRequest);            
-            transformationResponse?.Persona?.CheckedOutProducts.ForEach(product => total += product.Price);
+            var total = 0.0; 
+            persona.CheckedOutProducts.ForEach(product => total += product.Price);
             return new TotalAggregation { Total = total, Currency = persona.PreferredCurrency };
         }
     }

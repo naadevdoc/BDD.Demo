@@ -70,13 +70,13 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             });
             var service = ServiceFactory.GetA<ICatalogueServices>();
             var listOfResponses = listOfRequests.Select(request => service.UpsertExchangeRate(request));
-            listOfResponses.ToList().ForEach(response => Assert.True(response.HttpCode >= HttpStatusCode.OK, response.ErrorMessage));
+            listOfResponses.ToList().ForEach(response => Assert.True(response.HttpCode == HttpStatusCode.OK, response.ErrorMessage));
         }
         [Given(@"I have signed in as (.*)")]
         public void GivenIHaveSignedInAs(string name)
         {
             var personaResponse = ServiceFactory.GetA<ICatalogueServices>().GetPersonaByName(new GetPersonaRequest { Persona = new Persona { Name = name } });
-            Assert.True(personaResponse.HttpCode >= HttpStatusCode.OK && personaResponse.HttpCode <= HttpStatusCode.OK, personaResponse.ErrorMessage);
+            Assert.True(personaResponse.HttpCode == HttpStatusCode.OK, personaResponse.ErrorMessage);
             Assert.True(personaResponse.Persona != null, $"Persona with name {name} has not been found in catalogue");
             Assert.True(personaResponse.Persona.Name == name);
             _scenarioContext.Add(ConstantsStepDefinitions.GetPersonaResponseKey, personaResponse);
@@ -145,7 +145,7 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
         {
             var persona = _scenarioContext.Get<GetPersonaResponse>(ConstantsStepDefinitions.GetPersonaResponseKey);
             Assert.NotNull(persona.Persona);
-            var commitPurchaseRequest = new CommitPurchaseRequest { PersonaName = persona.Persona.Name };
+            var commitPurchaseRequest = new CommitPurchaseRequest { GetPersonaResponse = persona };
             var commitPurchaseResponse = ServiceFactory.GetA<ICartOperationsServices>().CommitPurchase(commitPurchaseRequest);
             _scenarioContext.Add(ConstantsStepDefinitions.CommitPurchaseResponse, commitPurchaseResponse);
         }

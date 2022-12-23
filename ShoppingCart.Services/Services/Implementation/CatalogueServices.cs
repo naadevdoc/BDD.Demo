@@ -5,10 +5,12 @@ using ShoppingCart.Services.Model.CatalogueService.Extensions;
 using ShoppingCart.Services.Model.Entities;
 using ShoppingCart.Services.Model.Entities.Extensions;
 using ShoppingCart.Services.Model.Extensions;
+using ShoppingCart.Services.Model.OperationsService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -62,6 +64,7 @@ namespace ShoppingCart.Services.Services.Implementation
         public GetPersonaResponse GetPersonaByName(GetPersonaRequest request) => 
             request.ValidateRequest(new GetPersonaResponse())
                    .ContinueWhenOk((response) => SearchAndSetResponse(response, request))
+                   .ContinueWhenOk(response => TransformProductsToPreferredCurrency(response))
                    ;
         /// <summary>
         /// Finds a product if exists from product catalog by name
@@ -91,6 +94,21 @@ namespace ShoppingCart.Services.Services.Implementation
         {
             response.Persona = SearchByName<Persona>(Personas, request.GetNameFromNamedEntity());
             return response.Persona == null ? response.SetHttpCodeWithError(HttpStatusCode.NotFound, $"Persona with name {request.GetNameFromNamedEntity()} is not found") : response;
+        }
+        private GetPersonaResponse TransformProductsToPreferredCurrency(GetPersonaResponse response)
+        {
+            var tranformPriceRequest = new TransformPriceForPersonRequest
+            {
+                GetPersonaResponse = response,
+            };
+            if (response.Persona?.CheckedOutProducts != null && response.Persona.CheckedOutProducts.Any())
+            {
+                var transformPriceResponse = ServiceFactory.GetA<ICartOperationsServices>().TranformPriceForPerson(tranformPriceRequest)
+                                                           .ContinueWhenOk(x => { response.Persona = x.Persona ?? (response.Persona = response.Persona); return x; })
+                                                           ;
+                response.SetHttpCodeWithError(transformPriceResponse.HttpCode, transformPriceResponse.ErrorMessage);
+            }
+            return response;
         }
         /// <summary>
         /// Actions driven to fill GetProductResponse. It will include Persona when found or NotFound and an custom error message when not found

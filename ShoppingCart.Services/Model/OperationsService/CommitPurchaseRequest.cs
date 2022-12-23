@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ShoppingCart.Services.Model.OperationsService
 {
-    public class CommitPurchaseRequest : PersonaRequest
+    public class CommitPurchaseRequest : OperationsPersonaRequest
     {
     }
 }

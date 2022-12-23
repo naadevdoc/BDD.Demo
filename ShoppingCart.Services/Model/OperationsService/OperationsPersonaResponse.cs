@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ShoppingCart.Services.Model.OperationsService
 {
-    abstract public class PersonaResponse: EntityResponse
+    abstract public class OperationsPersonaResponse: EntityResponse
     {
         public Persona? Persona { get; set; }
     }

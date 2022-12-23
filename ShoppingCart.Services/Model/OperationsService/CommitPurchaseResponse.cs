@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace ShoppingCart.Services.Model.OperationsService
 {
-    public class CommitPurchaseResponse : PersonaResponse
+    public class CommitPurchaseResponse : OperationsPersonaResponse
     {
-        public string PurchaseMessage { get; set; }
+        public string PurchaseMessage { get; set; } = string.Empty;
     }
 }

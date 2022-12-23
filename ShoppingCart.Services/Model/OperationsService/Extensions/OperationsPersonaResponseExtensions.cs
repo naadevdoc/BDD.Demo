@@ -1,5 +1,7 @@
 ﻿using ShoppingCart.Services.Model.CatalogueService;
+using ShoppingCart.Services.Model.Entities;
 using ShoppingCart.Services.Model.Extensions;
+using ShoppingCart.Services.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +11,10 @@ using System.Threading.Tasks;
 
 namespace ShoppingCart.Services.Model.OperationsService.Extensions
 {
-    public static class PersonaResponseExtensions
+    internal static class OperationsPersonaResponseExtensions
     {
-        internal static TPersonaResponse CheckGetPersonaResponse<TPersonaResponse>(this TPersonaResponse response, GetPersonaResponse getPersonaResponse) where TPersonaResponse : PersonaResponse
+        internal static TOperationsPersonaResponse CheckGetPersona<TOperationsPersonaResponse>(this TOperationsPersonaResponse response, GetPersonaResponse getPersonaResponse) 
+            where TOperationsPersonaResponse : OperationsPersonaResponse
         {
             var products = getPersonaResponse?.Persona?.CheckedOutProducts;
             var noProducts = products == null || !products.Any();
