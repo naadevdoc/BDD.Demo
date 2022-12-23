@@ -44,7 +44,8 @@ namespace ShoppingCart.Services.Services.Implementation
                 var personaProducts = new List<Product>();
                 var doNotModifyTheseProducts = newPersona?.CheckedOutProducts != null ? newPersona.CheckedOutProducts.Where(x => x.Currency == newPersona.PreferredCurrency).Select(x => x.Clone() as Product).ToList() : new List<Product?>();
                 var currencyToChangeProducts = newPersona?.CheckedOutProducts != null ? newPersona.CheckedOutProducts.Where(x => x.Currency != newPersona.PreferredCurrency).Select(x => x.Clone() as Product).ToList() : new List<Product?>();
-                httpCode = doNotModifyTheseProducts.Any(x => x == null) || currencyToChangeProducts.Any(x => x == null) ? HttpStatusCode.InternalServerError : HttpStatusCode.OK;
+                doNotModifyTheseProducts.ForEach(x => { if (x != null) { x.DiscountedPrice = persona.FidelityDiscount == 0 ? x.Price * (0 + x.Discount) : x.DiscountedPrice; } });
+                doNotModifyTheseProducts.ForEach(x => { if (x != null) { x.Price = persona.FidelityDiscount == 0 ? x.Price * (double)(1 - x.Discount) : x.Price; } });
                 var unifiedCurrencyProducts = currencyToChangeProducts.Where(x => x != null)
                                                              .Select(x => x != null ? (Product)x.Clone() : throw new InvalidCastException())
                                                              .Select(x => ProductTransformProduct(x,persona?.PreferredCurrency))
@@ -56,10 +57,6 @@ namespace ShoppingCart.Services.Services.Implementation
                                                                      .ToList();
                 personaProducts.AddRange(unifiedCurrencyProducts);
                 personaProducts.AddRange(notTransformedProducts);
-                personaProducts.ForEach(x => x.DiscountedPrice = persona.FidelityDiscount == 0 ? x.Price * (0 + x.Discount) : x.DiscountedPrice);
-                personaProducts.ForEach(x => x.Price = persona.FidelityDiscount == 0 ? x.Price * (double)(1 - x.Discount) : x.Price);
-                //personaProducts.ForEach(x => x.DiscountedPrice += x.Price * (0 + persona.FidelityDiscount));
-                //personaProducts.ForEach(x => x.Price *= (double)(1-persona.FidelityDiscount));
                 persona.CheckedOutProducts = persona?.CheckedOutProducts != null ? personaProducts : throw new InvalidCastException();
                 response.HttpCode= httpCode;
                 response.ErrorMessage = httpCode != HttpStatusCode.OK ? "Something went wrong when transforming currency" : string.Empty;
