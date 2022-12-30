@@ -8,6 +8,6 @@ namespace ShoppingCart.Services.Model.OperationsService
 {
     public class CommitPurchaseResponse : OperationsPersonaResponse
     {
-        public string PurchaseMessage { get; set; } = string.Empty;
+        public List<string> PurchaseMessages { get; set; } = new List<string>();
     }
 }

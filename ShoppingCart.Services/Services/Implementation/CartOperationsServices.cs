@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Ninject.Activation;
 using ShoppingCart.Services.Model.CatalogueService;
 using ShoppingCart.Services.Model.Entities;
+using ShoppingCart.Services.Model.Entities.Extensions;
 using ShoppingCart.Services.Model.Extensions;
 using ShoppingCart.Services.Model.OperationsService;
 using ShoppingCart.Services.Model.OperationsService.Extensions;
@@ -18,20 +19,59 @@ namespace ShoppingCart.Services.Services.Implementation
         public CommitPurchaseResponse CommitPurchase(CommitPurchaseRequest request)
         {
             var response = request.InitializeResponse(new CommitPurchaseResponse());
-            return ExecutePurchaseAndSetMessage(response);
+            try
+            {
+                var persona = request?.GetPersonaResponse?.Persona;
+                var discount = persona != null ? persona.GetDiscountFromTotal(GetExchangeRateForEUR(persona.ActiveCurrency)) : throw new InvalidOperationException("Commit Purchase Request; Persona is null");
+                return ExecutePurchaseAndSetMessage(response, discount);
+            }
+            catch (Exception ops)
+            {
+                return response.ContinueWhenOk(x => response.SetHttpCodeWithError(HttpStatusCode.InternalServerError, ops.Message));
+            }
         } 
 
         public TransformPriceForPersonResponse TranformPriceForPerson(TransformPriceForPersonRequest request)
         {
             var response = request.InitializeResponse(new TransformPriceForPersonResponse());
-            return response.ContinueWhenOk(response => AlignCurrency(response))
-                           ;
+            try
+            {
+                return response.ContinueWhenOk(response => AlignCurrency(response));
+            }
+            catch (Exception ops)
+            {
+                return response.ContinueWhenOk(x => response.SetHttpCodeWithError(HttpStatusCode.InternalServerError, ops.Message));
+            }
         }
-        private CommitPurchaseResponse ExecutePurchaseAndSetMessage(CommitPurchaseResponse response)
+        private double GetExchangeRateForEUR(CurrencyType currency)
         {
-            response.PurchaseMessage = response.HttpCode == HttpStatusCode.OK ? "Thank you for your purchase" :
+            var rate = 1.0;
+            if (currency != CurrencyType.EUR) 
+            {
+                var exchangeRateRequest = new GetExchangeRateRequest
+                {
+                    FromCurrency = currency,
+                    ToCurrency = CurrencyType.EUR,
+                };
+                var exchangeRateResponse = ServiceFactory.GetA<ICatalogueServices>().GetExchangeRate(exchangeRateRequest);
+                rate = (double)(exchangeRateResponse?.ExchangeRate?.Rate != null ? exchangeRateResponse.ExchangeRate.Rate : throw new InvalidOperationException($"{exchangeRateResponse?.HttpCode} : {exchangeRateResponse?.ErrorMessage}"));
+            }
+            return rate;
+        }
+        private CommitPurchaseResponse ExecutePurchaseAndSetMessage(CommitPurchaseResponse response, double fidelityDiscountIncrement)
+        {
+            response.PurchaseMessages.Add(response.HttpCode == HttpStatusCode.OK ? "Thank you for your purchase" :
                           response.HttpCode == HttpStatusCode.NoContent ? "There are no items to purchase" :
-                          string.Empty;
+                          string.Empty);
+            var persona = response.Persona;
+            if (persona?.FidelityDiscount != null && fidelityDiscountIncrement > 0)
+            {
+                persona.FidelityDiscount += fidelityDiscountIncrement;
+                response.PurchaseMessages.Add($"Congratulations. Now you have a fidelity discount of {persona.FidelityDiscount * 100}%");
+                var upsertResponse = ServiceFactory.GetA<ICatalogueServices>().UpsertPersona(new UpsertPersonaRequest { Persona = persona});
+                response.HttpCode = upsertResponse.HttpCode;
+                response.ErrorMessage = upsertResponse.ErrorMessage; 
+            }
             return response;
         }
 
@@ -48,7 +88,7 @@ namespace ShoppingCart.Services.Services.Implementation
                 doNotModifyTheseProducts.ForEach(x => { if (x != null) { x.Price = persona.FidelityDiscount == 0 ? x.Price * (double)(1 - x.Discount) : x.Price; } });
                 var unifiedCurrencyProducts = currencyToChangeProducts.Where(x => x != null)
                                                              .Select(x => x != null ? (Product)x.Clone() : throw new InvalidCastException())
-                                                             .Select(x => ProductTransformProduct(x,persona?.ActiveCurrency))
+                                                             .Select(x => ProductTransformation(x,persona?.ActiveCurrency))
                                                              .Where(x => x !=null)
                                                              .Select(x => x != null ? (Product)x.Clone() : throw new InvalidCastException())
                                                              .ToList();
@@ -63,7 +103,7 @@ namespace ShoppingCart.Services.Services.Implementation
             }
             return response;
         }
-        private Product? ProductTransformProduct(Product product, CurrencyType? toCurrency)
+        private Product? ProductTransformation(Product product, CurrencyType? toCurrency)
         {
             Product? returnedProduct = null;
             if (product != null && product?.Price != null && product?.Currency != null && toCurrency != null && product.Clone() is Product newProduct)

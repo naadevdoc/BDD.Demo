@@ -1,4 +1,6 @@
-﻿using ShoppingCart.Services.Model.OperationsService;
+﻿using Ninject.Activation;
+using ShoppingCart.Services.Model.CatalogueService;
+using ShoppingCart.Services.Model.OperationsService;
 using ShoppingCart.Services.Services;
 using System;
 using System.Collections.Generic;
@@ -43,5 +45,23 @@ namespace ShoppingCart.Services.Model.Entities.Extensions
             persona.FidelityDiscountMap.ToList().ForEach(x => currency.Add(x.Key, x.Value));
             return currency;
         }
+        private static TotalAggregation GetTotalInEUR(this Persona persona, double eurExchangeRate)
+        {
+            var currency = persona.ActiveCurrency;
+            if (currency == CurrencyType.EUR)
+            {
+                return persona.GetTotal();
+            }
+            else
+            {
+                return new TotalAggregation
+                {
+                    Currency = CurrencyType.EUR,
+                    Total = (double)(persona.GetTotal().Total * eurExchangeRate)
+                };
+            }
+        }
+        internal static double GetDiscountFromTotal(this Persona persona, double eurExchangerate) => persona.GetTotalInEUR(eurExchangerate).Total > 2000 ? 0.01 : 0.0;
+
     }
 }

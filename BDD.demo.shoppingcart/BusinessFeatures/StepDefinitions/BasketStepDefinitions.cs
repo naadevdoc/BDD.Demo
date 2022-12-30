@@ -142,6 +142,7 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             }
             service.UpsertPersona(new UpsertPersonaRequest { Persona = persona });
         }
+        [When(@"I purchase these products")]
         [When(@"I purchase my product")]
         public void WhenIPurchaseMyProduct()
         {
@@ -175,7 +176,7 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             Assert.True(personaResponse?.Persona != null, $"GetPersona has not Persona attached. Info:{personaResponse.HttpCode}, {personaResponse.ErrorMessage}");
             return personaResponse;
         }
-
+        [Given(@"I switched my preferred currency from (.*) to (.*)")]
         [When(@"I switch my preferred currency from (.*) to (.*)")]
         public void WhenISwitchMyPreferredCurrencyFromTo(CurrencyType from, CurrencyType to)
         {
@@ -204,9 +205,15 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
         {
             var commitPurchaseResponse = _scenarioContext.Get<CommitPurchaseResponse>(ConstantsStepDefinitions.CommitPurchaseResponse);
             Assert.True(commitPurchaseResponse.HttpCode == HttpStatusCode.OK || commitPurchaseResponse.HttpCode == HttpStatusCode.NoContent);
-            Assert.True(commitPurchaseResponse.PurchaseMessage == message, $"Expected '${message}' but obtained '${commitPurchaseResponse.PurchaseMessage}'");
+            string concatMessages = string.Empty;
+            commitPurchaseResponse.PurchaseMessages.ForEach(x => concatMessages += $"{x}{Environment.NewLine}");
+            Assert.True(commitPurchaseResponse.PurchaseMessages.Any(x => x == message), $"Expected '${message}' but obtained '${concatMessages}'");
         }
-
+        [Then(@"I will have following messages in my inbox")]
+        public void ThenIWillHaveFollowingMessagesInMyInbox(Table table)
+        {
+            table.Rows.ToList().ForEach(x => ThenIWillReceiveAMessage(x["Message"]));
+        }
 
         [Then(@"cart total will be (.*) (.*)")]
         [Then(@"total cost will be (.*) (.*)")]
@@ -252,7 +259,7 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             Assert.NotNull(personaResponse);
             Assert.True(personaResponse.HttpCode == HttpStatusCode.OK, $"Error code: {personaResponse.HttpCode} Error message {personaResponse.ErrorMessage}");
             Assert.NotNull(personaResponse.Persona);
-            Assert.True(personaResponse.Persona.FidelityDiscount == discount, $"The step expected discount to be '{discount}' when actual discount is '{personaResponse.Persona.FidelityDiscount}'");
+            Assert.True(personaResponse.Persona.FidelityDiscount == (double)discount/100, $"The step expected discount to be '{discount}' when actual discount is '{personaResponse.Persona.FidelityDiscount}'");
         }
 
     }

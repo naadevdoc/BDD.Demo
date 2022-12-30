@@ -160,7 +160,7 @@ Scenario: Delta12->Fidelity discount is asigned to currency
 Scenario: Delta13->Fidelity discount is persisted when the persona switches back to previous currency
 	Given I have signed in as Jules
 	And I switched my preferred currency from USD to EUR
-	When I siwtch my preferred currency from EUR to USD
+	When I switch my preferred currency from EUR to USD
 	Then my fidelity discount will be 5%
 
 
@@ -175,6 +175,7 @@ Scenario: Delta14->A persona who buys more than 2000 EUR in a single buy upgrade
 	 | Message                                                 |
 	 | Thank you for your purchase                             |
 	 | Congratulations. Now you have a fidelity discount of 1% |
+	And my fidelity discount will be 1%
 
 
 Scenario: Delta15->Maximum fidelity discount for a persona is 20%
@@ -188,3 +189,4 @@ Scenario: Delta15->Maximum fidelity discount for a persona is 20%
 	 | Message                       |
 	 | Thank you for your purchase   |
 	 | Your fidelity discount is 20% |
+	And my fidelity discount will be 20%
