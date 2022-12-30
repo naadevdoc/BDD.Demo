@@ -42,13 +42,13 @@ namespace ShoppingCart.Services.Services.Implementation
             if (persona?.Clone() is Persona newPersona && response.HttpCode == HttpStatusCode.OK)
             {
                 var personaProducts = new List<Product>();
-                var doNotModifyTheseProducts = newPersona?.CheckedOutProducts != null ? newPersona.CheckedOutProducts.Where(x => x.Currency == newPersona.PreferredCurrency).Select(x => x.Clone() as Product).ToList() : new List<Product?>();
-                var currencyToChangeProducts = newPersona?.CheckedOutProducts != null ? newPersona.CheckedOutProducts.Where(x => x.Currency != newPersona.PreferredCurrency).Select(x => x.Clone() as Product).ToList() : new List<Product?>();
+                var doNotModifyTheseProducts = newPersona?.CheckedOutProducts != null ? newPersona.CheckedOutProducts.Where(x => x.Currency == newPersona.ActiveCurrency).Select(x => x.Clone() as Product).ToList() : new List<Product?>();
+                var currencyToChangeProducts = newPersona?.CheckedOutProducts != null ? newPersona.CheckedOutProducts.Where(x => x.Currency != newPersona.ActiveCurrency).Select(x => x.Clone() as Product).ToList() : new List<Product?>();
                 doNotModifyTheseProducts.ForEach(x => { if (x != null) { x.DiscountedPrice = persona.FidelityDiscount == 0 ? x.Price * (0 + x.Discount) : x.DiscountedPrice; } });
                 doNotModifyTheseProducts.ForEach(x => { if (x != null) { x.Price = persona.FidelityDiscount == 0 ? x.Price * (double)(1 - x.Discount) : x.Price; } });
                 var unifiedCurrencyProducts = currencyToChangeProducts.Where(x => x != null)
                                                              .Select(x => x != null ? (Product)x.Clone() : throw new InvalidCastException())
-                                                             .Select(x => ProductTransformProduct(x,persona?.PreferredCurrency))
+                                                             .Select(x => ProductTransformProduct(x,persona?.ActiveCurrency))
                                                              .Where(x => x !=null)
                                                              .Select(x => x != null ? (Product)x.Clone() : throw new InvalidCastException())
                                                              .ToList();

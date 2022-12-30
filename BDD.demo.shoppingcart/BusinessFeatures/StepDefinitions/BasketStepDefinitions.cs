@@ -47,7 +47,7 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
                 Persona = new Persona
                 {
                     Name = row["Name"],
-                    PreferredCurrency = Enum.Parse<CurrencyType>(row["Preferred currency"]),
+                    ActiveCurrency = Enum.Parse<CurrencyType>(row["Preferred currency"]),
                     FidelityDiscount = double.Parse(row["Fidelity discount"].Replace("%", "")) / 100
                 }
             });
@@ -80,6 +80,7 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             Assert.True(personaResponse.HttpCode == HttpStatusCode.OK, personaResponse.ErrorMessage);
             Assert.True(personaResponse.Persona != null, $"Persona with name {name} has not been found in catalogue");
             Assert.True(personaResponse.Persona.Name == name);
+            _scenarioContext.Add(ConstantsStepDefinitions.ActivePersona, name);
             _scenarioContext.Add(ConstantsStepDefinitions.GetPersonaResponseKey, personaResponse);
         }
 
@@ -174,6 +175,23 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
             Assert.True(personaResponse?.Persona != null, $"GetPersona has not Persona attached. Info:{personaResponse.HttpCode}, {personaResponse.ErrorMessage}");
             return personaResponse;
         }
+
+        [When(@"I switch my preferred currency from (.*) to (.*)")]
+        public void WhenISwitchMyPreferredCurrencyFromTo(CurrencyType from, CurrencyType to)
+        {
+            var personaResponse = _scenarioContext.Get<GetPersonaResponse>(ConstantsStepDefinitions.GetPersonaResponseKey);
+            var persona = personaResponse.Persona;
+            Assert.NotNull(persona);
+            persona.ActiveCurrency = to;
+            var upsertRequest = new UpsertPersonaRequest
+            {
+                Persona = persona,
+            };
+            var upsertResponse = ServiceFactory.GetA<ICatalogueServices>().UpsertPersona(upsertRequest);
+            Assert.NotNull(upsertResponse);
+            Assert.True(upsertResponse.HttpCode == HttpStatusCode.OK, $"Error {upsertResponse.HttpCode}: {upsertResponse.ErrorMessage}");
+        }
+
         [Then(@"there will be a single product with code '([^']*)'")]
         public void ThenThereWillBeASingleProductWithCode(string productName)
         {
@@ -220,6 +238,21 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
                 var price = double.Parse(row["price"]);
                 Assert.True(personaResponse?.Persona?.CheckedOutProducts.FirstOrDefault(x => x.Name == product && x.Price == price) != null, $"{product} with price {price} not found");
             }
+        }
+        [Then(@"my fidelity discount will be (.*)%")]
+        public void ThenMyFidelityDiscountWillBe(double discount)
+        {
+            var activePersonaName = _scenarioContext.Get<string>(ConstantsStepDefinitions.ActivePersona);
+            Assert.True(!string.IsNullOrEmpty(activePersonaName));
+            var personaRequest = new GetPersonaRequest
+            {
+                Persona = new Persona { Name = activePersonaName },
+            };
+            var personaResponse = ServiceFactory.GetA<ICatalogueServices>().GetPersonaByName(personaRequest);
+            Assert.NotNull(personaResponse);
+            Assert.True(personaResponse.HttpCode == HttpStatusCode.OK, $"Error code: {personaResponse.HttpCode} Error message {personaResponse.ErrorMessage}");
+            Assert.NotNull(personaResponse.Persona);
+            Assert.True(personaResponse.Persona.FidelityDiscount == discount, $"The step expected discount to be '{discount}' when actual discount is '{personaResponse.Persona.FidelityDiscount}'");
         }
 
     }

@@ -1,6 +1,9 @@
 ﻿using ShoppingCart.Services.Model.Entities.Extensions;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,8 +12,13 @@ namespace ShoppingCart.Services.Model.Entities
 {
     public class Persona : NamedEntity
     {
-        public CurrencyType PreferredCurrency { get; set; } = CurrencyType.EUR;
-        public double FidelityDiscount { get; set; } = 0.0;
+        public CurrencyType ActiveCurrency { get; set; } = CurrencyType.EUR;
+        public double FidelityDiscount
+        {
+            get => FidelityDiscountMap[ActiveCurrency];
+            set => FidelityDiscountMap[ActiveCurrency] = value;
+        }
+        public Dictionary<CurrencyType, double> FidelityDiscountMap { get; set; } = PersonaExtensions.InitializeCurrencies();
         public List<Product> CheckedOutProducts { get; set; } = new List<Product>();
         public TotalAggregation TotalAggregation 
         { 
@@ -24,18 +32,15 @@ namespace ShoppingCart.Services.Model.Entities
 
         public override object Clone()
         {
-
-#pragma warning disable CS8619 // Inserting Where p is Product to ensure all p will be Products.
             return new Persona
             {
-                CheckedOutProducts = CheckedOutProducts.Where(p => p as Product != null)
-                                                       .Select(p => p.Clone() as Product)
+                CheckedOutProducts = CheckedOutProducts.Select(p =>  (Product)p.Clone())
                                                        .ToList(),
-                FidelityDiscount = FidelityDiscount,
                 Name = Name,
-                PreferredCurrency = PreferredCurrency
+                ActiveCurrency = ActiveCurrency,
+                FidelityDiscountMap = this.CloneCurrencyMap(),
             };
-#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
         }
+
     }
 }

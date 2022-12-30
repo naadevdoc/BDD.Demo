@@ -18,7 +18,7 @@ namespace ShoppingCart.Services.Model.Entities.Extensions
             persona.CheckedOutProducts.ForEach(product => total += product.Price);
             total = persona.FidelityDiscount != 0 ? total * (double)(1 - persona.FidelityDiscount) : total;
             total = Math.Round(total, 2);
-            return new TotalAggregation { Total = total, Currency = persona.PreferredCurrency };
+            return new TotalAggregation { Total = total, Currency = persona.ActiveCurrency };
         }
         internal static TotalAggregation GetTotalDiscount(this Persona persona)
         {
@@ -26,7 +26,22 @@ namespace ShoppingCart.Services.Model.Entities.Extensions
             persona.CheckedOutProducts.ForEach(product => total += product.Price);
             total = Math.Round(total, 2);
             var totalDiscount = total - persona.GetTotal().Total;
-            return new TotalAggregation { Total = totalDiscount, Currency = persona.PreferredCurrency };
+            return new TotalAggregation { Total = totalDiscount, Currency = persona.ActiveCurrency };
+        }
+
+        internal static Dictionary<CurrencyType,double> InitializeCurrencies()
+        {
+            var currency = new Dictionary<CurrencyType,double>();
+            var values = Enum.GetValues<CurrencyType>().ToList();
+            values.ForEach(x => currency[x] = (double)0.0); 
+            return currency;
+        }
+
+        internal static Dictionary<CurrencyType, double> CloneCurrencyMap(this Persona persona)
+        {
+            var currency = new Dictionary<CurrencyType, double>();
+            persona.FidelityDiscountMap.ToList().ForEach(x => currency.Add(x.Key, x.Value));
+            return currency;
         }
     }
 }

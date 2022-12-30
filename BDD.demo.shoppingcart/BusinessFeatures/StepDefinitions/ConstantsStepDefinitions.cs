@@ -10,5 +10,6 @@ namespace BDD.demo.shoppingcart.BusinessFeatures.StepDefinitions
     {
         public const string GetPersonaResponseKey = "ThisIsWhoIam";
         public const string CommitPurchaseResponse = "AfterBuying";
+        public const string ActivePersona = "ActivePersona";
     }
 }

@@ -232,7 +232,7 @@ namespace BDD.demo.shoppingcart.TechnicalFeatures.StepDefinitions
         public void ThenPersonaPrefferedCurrencyWillBeEUR(CurrencyType currency)
         {
             var request = _scenarioContext.Get<UpsertPersonaRequest>(ConstantsStepDefinitions.RequestContextKey);
-            Assert.True(request.Persona.PreferredCurrency == currency, $"Default preferred currency must be {currency}");
+            Assert.True(request.Persona.ActiveCurrency == currency, $"Default preferred currency must be {currency}");
         }
 
         [Then(@"fidelity discount will be 0.0")]
