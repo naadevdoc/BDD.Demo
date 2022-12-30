@@ -64,14 +64,20 @@ namespace ShoppingCart.Services.Services.Implementation
                           response.HttpCode == HttpStatusCode.NoContent ? "There are no items to purchase" :
                           string.Empty);
             var persona = response.Persona;
-            if (persona?.FidelityDiscount != null && fidelityDiscountIncrement > 0)
+            var additionalPurchaseMessages = new List<string>();
+            if (persona?.FidelityDiscount != null && fidelityDiscountIncrement > 0 && persona.FidelityDiscount < 0.2)
             {
                 persona.FidelityDiscount += fidelityDiscountIncrement;
-                response.PurchaseMessages.Add($"Congratulations. Now you have a fidelity discount of {persona.FidelityDiscount * 100}%");
+                additionalPurchaseMessages.Add($"Congratulations. Now you have a fidelity discount of {persona.FidelityDiscount * 100}%");
                 var upsertResponse = ServiceFactory.GetA<ICatalogueServices>().UpsertPersona(new UpsertPersonaRequest { Persona = persona});
                 response.HttpCode = upsertResponse.HttpCode;
                 response.ErrorMessage = upsertResponse.ErrorMessage; 
             }
+            if (persona?.FidelityDiscount != null && persona.FidelityDiscount >= 0.2)
+            {
+                additionalPurchaseMessages.Add($"Your fidelity discount is {persona.FidelityDiscount*100}%");
+            }
+            response.PurchaseMessages.AddRange(additionalPurchaseMessages);
             return response;
         }
 

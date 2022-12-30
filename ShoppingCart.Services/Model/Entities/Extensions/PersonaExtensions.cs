@@ -61,7 +61,7 @@ namespace ShoppingCart.Services.Model.Entities.Extensions
                 };
             }
         }
-        internal static double GetDiscountFromTotal(this Persona persona, double eurExchangerate) => persona.GetTotalInEUR(eurExchangerate).Total > 2000 ? 0.01 : 0.0;
+        internal static double GetDiscountFromTotal(this Persona persona, double eurExchangerate) => persona.GetTotalInEUR(eurExchangerate).Total > 2000 && persona.FidelityDiscount < 0.2 ? 0.01 : 0.0;
 
     }
 }
